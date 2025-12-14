@@ -122,7 +122,9 @@ window.onload = () => {
         { id: 76, name: "Gucci", img: "img/l76.png", desc: "Olasz luxus divatmárka, amely ikonikus táskáiról, cipőiről és ruházatáról híres." },
         { id: 77, name: "Dior", img: "img/l77.png", desc: "Francia luxus divatmárka, amely haute couture ruházatot, parfümöket és kiegészítőket kínál." },
         { id: 78, name: "Versace", img: "img/l78.png", desc: "Olasz divatmárka, amely extravagáns stílusáról és ikonikus mintáiról ismert." },
-        { id: 79, name: "MAC", img: "img/l79.png", desc: "A MAC Cosmetics kanadai kozmetikai márka, amely professzionális sminktermékeiről és széles színválasztékáról ismert." },
+        
+        
+        /*{ id: 79, name: "MAC", img: "img/l79.png", desc: "A MAC Cosmetics kanadai kozmetikai márka, amely professzionális sminktermékeiről és széles színválasztékáról ismert." },
         { id: 80, name: "Tommy Hilfiger", img: "img/l80.png", desc: "Amerikai divatmárka, amely klasszikus amerikai stílusú ruházatot, cipőket és kiegészítőket kínál." },
         { id: 81, name: "Tissot", img: "img/l81.png", desc: "Svájci óragyártó, amely megfizethető, precíziós időmérőiről és sportóráiról ismert." },
         { id: 82, name: "Michael Kors", img: "img/l82.png", desc: "Amerikai luxus divatmárka, amely táskákat, órákat, ruházatot és kiegészítőket kínál." },
@@ -235,7 +237,7 @@ window.onload = () => {
         { id: 189, name: "Twitch", img: "img/l189.png", desc: "Amerikai streaming platform, amely videojáték-közvetítésekre és élő tartalmakra épül." },
         { id: 190, name: "Monster", img: "img/l190.png", desc: "Amerikai energiaital-márka, híres extrémsport szponzorációiról." },
         { id: 191, name: "DreamWorks", img: "img/l191.png", desc: "Amerikai filmstúdió, híres animációs és élőszereplős filmjeiről." },
-        { id: 192, name: "Warner Bros.", img: "img/l192.png", desc: "Amerikai film- és televíziós stúdió, híres klasszikus és modern produkcióiról." }, 
+        { id: 192, name: "Warner Bros.", img: "img/l192.png", desc: "Amerikai film- és televíziós stúdió, híres klasszikus és modern produkcióiról." }, */
     ];
     // --- EDDIG TART AZ EGYEDI ADATOK DEFINIÁLÁSA ---
     
