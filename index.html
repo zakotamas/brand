@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Galaxis - ahol a logók csillagként ragyognak</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="img/Brandlogofavi.ico">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-logo">BRAND</div>
+        
+        <div class="nav-search" id="navSearch">
+            <input type="text" id="searchInput" placeholder="Keresés név alapján...">
+            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </div>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Rólunk</a></li>
+            <li class="mobile-hide-on-default">
+                <a href="#" class="btn-login">Bejelentkezés</a>
+            </li>
+            <li class="mobile-hide-on-default">
+                <a href="#" class="btn-register">Regisztráció</a>
+            </li>
+        </ul>
+        
+        <div class="hamburger" id="hamburgerBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+
+    <main id="scene-container">
+        </main>
+
+    <div id="modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn">&times;</button>
+            <div class="modal-header">
+                <img id="modal-img" src="" alt="">
+                <h2 id="modal-title">Cég Neve</h2>
+            </div>
+            <div class="modal-body">
+                <p id="modal-desc">Itt olvasható a cég részletes leírása...</p>
+                <button class="modal-action-btn">Bővebben</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
