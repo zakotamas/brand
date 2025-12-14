@@ -3,53 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brand Galaxis - ahol a logók csillagként ragyognak</title>
+    <title>Interaktív Logó Univerzum</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="img/Brandlogofavi.ico">
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="nav-logo">BRAND</div>
-        
-        <div class="nav-search" id="navSearch">
-            <input type="text" id="searchInput" placeholder="Keresés név alapján...">
-            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <header>
+        <div class="nav-container">
+            <div class="logo-placeholder">LOGÓ UNIVERZUM</div>
+            <div class="nav-elements">
+                <input type="text" id="searchInput" placeholder="Keresés márkanévre...">
+                <div class="hamburger" id="hamburgerBtn">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
         </div>
+        <nav id="navLinks">
+            <ul>
+                <li><a href="#info">Információ</a></li>
+                <li><a href="#contact">Kapcsolat</a></li>
+                </ul>
+        </nav>
+    </header>
 
-        <ul class="nav-links" id="navLinks">
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Rólunk</a></li>
-            <li class="mobile-hide-on-default">
-                <a href="#" class="btn-login">Bejelentkezés</a>
-            </li>
-            <li class="mobile-hide-on-default">
-                <a href="#" class="btn-register">Regisztráció</a>
-            </li>
-        </ul>
-        
-        <div class="hamburger" id="hamburgerBtn">
-            <span></span>
-            <span></span>
-            <span></span>
+    <div class="scene-container" id="scene-container">
         </div>
-    </nav>
+    
+    <div class="mobile-warning-modal" id="mobileWarningModal">
+        <div class="warning-content">
+            <h3>⚠️ Kijelző optimalizálás szükséges</h3>
+            <p>Ez az interaktív tartalom optimálisan nagy képernyőre lett tervezve.</p>
+            <p>**Kisebb kijelzőn (telefon/tablet) a legjobb élmény érdekében kérjük:**</p>
+            <ul>
+                <li>▶️ **Távolítson el (zoom out)** az oldalon (két ujjal csippentés).</li>
+                <li>▶️ Esetleg forgassa el a készülékét **vízszintes (fekvő) állásba.**</li>
+            </ul>
+            <button id="closeWarningBtn">Értem</button>
+        </div>
+    </div>
 
-    <main id="scene-container">
-        </main>
-
-    <div id="modal" class="modal-overlay">
+    <div id="modal" class="modal">
         <div class="modal-content">
-            <button class="close-btn">&times;</button>
-            <div class="modal-header">
-                <img id="modal-img" src="" alt="">
-                <h2 id="modal-title">Cég Neve</h2>
-            </div>
-            <div class="modal-body">
-                <p id="modal-desc">Itt olvasható a cég részletes leírása...</p>
-                <button class="modal-action-btn">Bővebben</button>
-            </div>
+            <span class="close-btn">&times;</span>
+            <img id="modal-img" src="" alt="">
+            <h2 id="modal-title"></h2>
+            <p id="modal-desc"></p>
         </div>
     </div>
 

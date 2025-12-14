@@ -9,6 +9,10 @@ window.onload = () => {
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     const navLinks = document.getElementById('navLinks');
     
+    // ÚJ: Mobil figyelmeztető modal elemek
+    const mobileWarningModal = document.getElementById('mobileWarningModal');
+    const closeWarningBtn = document.getElementById('closeWarningBtn');
+    
     // DRAG VÁLTOZÓK
     let draggedItem = null;
     const dragDistanceThreshold = 5; 
@@ -122,9 +126,8 @@ window.onload = () => {
         { id: 76, name: "Gucci", img: "img/l76.png", desc: "Olasz luxus divatmárka, amely ikonikus táskáiról, cipőiről és ruházatáról híres." },
         { id: 77, name: "Dior", img: "img/l77.png", desc: "Francia luxus divatmárka, amely haute couture ruházatot, parfümöket és kiegészítőket kínál." },
         { id: 78, name: "Versace", img: "img/l78.png", desc: "Olasz divatmárka, amely extravagáns stílusáról és ikonikus mintáiról ismert." },
-        
-        
-        /*{ id: 79, name: "MAC", img: "img/l79.png", desc: "A MAC Cosmetics kanadai kozmetikai márka, amely professzionális sminktermékeiről és széles színválasztékáról ismert." },
+    /**
+        { id: 79, name: "MAC", img: "img/l79.png", desc: "A MAC Cosmetics kanadai kozmetikai márka, amely professzionális sminktermékeiről és széles színválasztékáról ismert." },
         { id: 80, name: "Tommy Hilfiger", img: "img/l80.png", desc: "Amerikai divatmárka, amely klasszikus amerikai stílusú ruházatot, cipőket és kiegészítőket kínál." },
         { id: 81, name: "Tissot", img: "img/l81.png", desc: "Svájci óragyártó, amely megfizethető, precíziós időmérőiről és sportóráiról ismert." },
         { id: 82, name: "Michael Kors", img: "img/l82.png", desc: "Amerikai luxus divatmárka, amely táskákat, órákat, ruházatot és kiegészítőket kínál." },
@@ -237,7 +240,8 @@ window.onload = () => {
         { id: 189, name: "Twitch", img: "img/l189.png", desc: "Amerikai streaming platform, amely videojáték-közvetítésekre és élő tartalmakra épül." },
         { id: 190, name: "Monster", img: "img/l190.png", desc: "Amerikai energiaital-márka, híres extrémsport szponzorációiról." },
         { id: 191, name: "DreamWorks", img: "img/l191.png", desc: "Amerikai filmstúdió, híres animációs és élőszereplős filmjeiről." },
-        { id: 192, name: "Warner Bros.", img: "img/l192.png", desc: "Amerikai film- és televíziós stúdió, híres klasszikus és modern produkcióiról." }, */
+        { id: 192, name: "Warner Bros.", img: "img/l192.png", desc: "Amerikai film- és televíziós stúdió, híres klasszikus és modern produkcióiról." }, 
+    **/
     ];
     // --- EDDIG TART AZ EGYEDI ADATOK DEFINIÁLÁSA ---
     
@@ -250,9 +254,13 @@ window.onload = () => {
         if (isMobileView) {
             maxSpeed = MOBILE_MAX_SPEED;
             minStartSpeed = MOBILE_MIN_SPEED;
+            // ÚJ: Mobil figyelmeztetés megjelenítése
+            mobileWarningModal.classList.add('active');
         } else {
             maxSpeed = DESKTOP_MAX_SPEED;
             minStartSpeed = DESKTOP_MIN_SPEED;
+            // ÚJ: Mobil figyelmeztetés elrejtése
+            mobileWarningModal.classList.remove('active');
         }
         
         // Visszaállítja az összes kártya sebességét az új maximumra
@@ -267,6 +275,11 @@ window.onload = () => {
             }
         });
     }
+    
+    // ÚJ: Figyelmeztetés bezárása
+    closeWarningBtn.addEventListener('click', () => {
+        mobileWarningModal.classList.remove('active');
+    });
 
     // 2. Kártyák létrehozása
     const cardElements = [];
@@ -647,7 +660,7 @@ window.onload = () => {
         updateDimmedState();
     });
 
-    // 8. Modal Funkciók
+    // 8. Modal Funkciók (Logó részletei)
     function openModal(item) {
         document.getElementById('modal-img').src = item.img; 
         document.getElementById('modal-title').innerText = item.name;
@@ -683,7 +696,8 @@ window.onload = () => {
             });
         }
         
-        document.body.style.overflow = 'hidden'; 
+        // A modal bezárása után engedjük, hogy a body tartalmát lehessen görgetni
+        document.body.style.overflow = ''; 
     }
 
     closeBtn.addEventListener('click', closeModal);
@@ -710,15 +724,15 @@ window.onload = () => {
             } else {
                 container.style.pointerEvents = 'none'; 
             }
-            document.body.style.overflow = 'hidden';
+            document.body.style.overflow = '';
         }
     });
     
-    // Ablak átméretezés kezelése
+    // Ablak átméretezés kezelése (Frissíti a sebességet és a nézetet, megjeleníti/elrejti a figyelmeztetést)
     window.addEventListener('resize', () => {
         const w = window.innerWidth;
         const h = window.innerHeight;
         calculateBounds(w, h);
-        checkMobileState(); // Meghívjuk a sebesség és nézet ellenőrzését
+        checkMobileState(); 
     });
 };
