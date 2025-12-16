@@ -1,52 +1,64 @@
-// A teljes logikát a window.onload alá helyezzük, hogy a böngésző biztosan érzékelje a lap betöltésének végét
 window.onload = () => {
+    // DOM elemek
     const container = document.getElementById('scene-container');
     const searchInput = document.getElementById('searchInput');
-    
     const modal = document.getElementById('modal');
     const closeBtn = document.querySelector('.close-btn');
-
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     const navLinks = document.getElementById('navLinks');
-    
-    // ÚJ: Mobil figyelmeztető modal elemek
     const mobileWarningModal = document.getElementById('mobileWarningModal');
     const closeWarningBtn = document.getElementById('closeWarningBtn');
+    const clearSearchBtn = document.getElementById('clearSearchBtn'); // ÚJ
+
+    // LocalStorage kulcs a figyelmeztetéshez
+    const WARNING_SEEN_KEY = 'mobileWarningSeen';
     
-    // DRAG VÁLTOZÓK
+    // ----------------------------------------------------------------
+    // KONFIGURÁCIÓ ÉS VÁLTOZÓK
+    // ----------------------------------------------------------------
+    
+    // Drag (Húzás) változók
     let draggedItem = null;
     const dragDistanceThreshold = 5; 
     let dragStartX = 0;
     let dragStartY = 0;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
     
-    // Z TENGELY KORLÁTOK
+    // Z tengely (Mélység)
     const minZ = 0; 
     const maxZ = 400; 
     
-    // SZŰKÍTETT HATÁROK a 3D kilógás megelőzésére
-    const PADDING_PERCENTAGE_X = 5;
-    const PADDING_PERCENTAGE_Y = 5;
+    // Falak margója (Padding) százalékban
+    const PADDING_PERCENTAGE_X = 2; 
+    const PADDING_PERCENTAGE_Y = 2;
     
-    // ----------------------------------------------------------------
-    // SEBESSÉG VÁLTOZÓK ÉS BREAKPOINT
-    // ----------------------------------------------------------------
-    
-    // ASZTALI NÉZET (PC, Laptop) - ÉLÉNK, ÜTKÖZŐ FIZIKA
+    // Sebesség és Nézet beállítások
     const DESKTOP_MAX_SPEED = 0.08; 
-    const DESKTOP_MIN_SPEED = 0.05;
+    const MOBILE_BREAKPOINT = 768; 
+    const MOBILE_MAX_SPEED = 0.03; 
     
-    // MOBIL/TABLET NÉZET - LASSÚ, ÁRAMLÓ FIZIKA, ÜTKÖZTETÉS KIKAPCSOLVA
-    const MOBILE_BREAKPOINT = 768; // pl. 768px alatt mobilnak tekintjük
-    const MOBILE_MAX_SPEED = 0.025; // Sokkal lassabb mozgás
-    const MOBILE_MIN_SPEED = 0.01; 
-    
-    // Aktuális állapotok
+    // Aktuális állapot
     let maxSpeed = DESKTOP_MAX_SPEED;
-    let minStartSpeed = DESKTOP_MIN_SPEED;
     let isMobileView = window.innerWidth <= MOBILE_BREAKPOINT; 
-    // ----------------------------------------------------------------
+    
+    // Fizikai méretek (később frissülnek)
+    let cardSize = 120;
+    const navHeight = 70; // Header magassága
+    let collisionDistance = 125; 
 
-    // 1. EGYEDI ADATSTRUKTÚRA (192 LOGÓ)
+    // Cache-elt határok a teljesítményért
+    let cachedBounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+
+    // --- Központosításhoz ÚJ VÁLTOZÓK ---
+    let isSearching = false;
+    const CENTER_TARGET_DAMPING = 0.15; // Sima átmenet sebessége
+    const CENTER_AREA_WIDTH = 600; // Központi rács max szélessége
+    const CENTER_AREA_HEIGHT = 400; // Központi rács max magassága
+
+    // ----------------------------------------------------------------
+    // ADATOK (LOGÓK)
+    // ----------------------------------------------------------------
     const items = [
         { id: 1, name: "Nike", img: "img/l1.png", desc: "A Nike Inc. egy amerikai multinacionális vállalat, amely cipők, ruházati cikkek, sportfelszerelések és kiegészítők tervezésével, fejlesztésével és gyártásával foglalkozik. Küldetésük az inspiráció és innováció eljuttatása minden sportolóhoz a világon." },
         { id: 2, name: "McDonald's", img: "img/l2.png", desc: "A világ vezető gyorséttermi lánca, több mint 100 országban van jelen. Folyamatosan fejleszti éttermi élményét és globális ellátási láncát a fenntarthatóság jegyében." },
@@ -243,71 +255,134 @@ window.onload = () => {
         { id: 192, name: "Warner Bros.", img: "img/l192.png", desc: "Amerikai film- és televíziós stúdió, híres klasszikus és modern produkcióiról." }, 
     **/
     ];
-    // --- EDDIG TART AZ EGYEDI ADATOK DEFINIÁLÁSA ---
-    
+
     // ----------------------------------------------------------------
-    // FÜGGVÉNY: Sebesség és nézet beállítása képernyőméret alapján
+    // INICIALIZÁLÁS ÉS SEGÉDFÜGGVÉNYEK
     // ----------------------------------------------------------------
+
     function checkMobileState() {
         isMobileView = window.innerWidth <= MOBILE_BREAKPOINT;
 
         if (isMobileView) {
             maxSpeed = MOBILE_MAX_SPEED;
-            minStartSpeed = MOBILE_MIN_SPEED;
-            // ÚJ: Mobil figyelmeztetés megjelenítése
-            mobileWarningModal.classList.add('active');
+            const seen = localStorage.getItem(WARNING_SEEN_KEY);
+            if (!seen) {
+                 mobileWarningModal.classList.add('active');
+            }
         } else {
             maxSpeed = DESKTOP_MAX_SPEED;
-            minStartSpeed = DESKTOP_MIN_SPEED;
-            // ÚJ: Mobil figyelmeztetés elrejtése
             mobileWarningModal.classList.remove('active');
         }
+    }
+    
+    closeWarningBtn.addEventListener('click', () => {
+        mobileWarningModal.classList.remove('active');
+        localStorage.setItem(WARNING_SEEN_KEY, 'true');
+    });
+
+    function updateBounds() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
         
-        // Visszaállítja az összes kártya sebességét az új maximumra
+        cardSize = isMobileView ? 90 : 120;
+        collisionDistance = isMobileView ? 95 : 125;
+
+        cachedBounds.minX = (w * PADDING_PERCENTAGE_X / 100);
+        cachedBounds.maxX = w - (w * PADDING_PERCENTAGE_X / 100) - cardSize;
+        cachedBounds.minY = navHeight + (h * PADDING_PERCENTAGE_Y / 100);
+        cachedBounds.maxY = h - (h * PADDING_PERCENTAGE_Y / 100) - cardSize;
+    }
+
+    function rotate(vx, vy, angle) {
+        return {
+            vx: vx * Math.cos(angle) + vy * Math.sin(angle),
+            vy: vy * Math.cos(angle) - vx * Math.sin(angle)
+        };
+    }
+    
+    function updateDimmedState() {
+        const currentlyHovered = cardElements.some(c => c.isHovering);
+        
         cardElements.forEach(item => {
-            if (!item.isDragging) {
-                if (Math.abs(item.vx) > maxSpeed) {
-                    item.vx = Math.sign(item.vx) * maxSpeed;
-                }
-                if (Math.abs(item.vy) > maxSpeed) {
-                    item.vy = Math.sign(item.vy) * maxSpeed;
-                }
+            if (currentlyHovered && !item.isHovering && !item.element.classList.contains('filtered-out')) {
+                item.element.classList.add('dimmed');
+            } else {
+                item.element.classList.remove('dimmed');
             }
         });
     }
-    
-    // ÚJ: Figyelmeztetés bezárása
-    closeWarningBtn.addEventListener('click', () => {
-        mobileWarningModal.classList.remove('active');
-    });
 
-    // 2. Kártyák létrehozása
+    // ÚJ FÜGGVÉNY: Középen elhelyezett rács kiszámítása
+    function calculateCenteredGrid(cards) {
+        const containerW = window.innerWidth;
+        const containerH = window.innerHeight;
+        
+        // A képernyő közepéhez viszonyítva (figyelembe véve a fejlécmagasságot)
+        const centerX = containerW / 2;
+        const centerY = (containerH + navHeight) / 2; 
+
+        // Rács méret dinamikus számítása, hogy ne legyen nagyobb, mint a képernyő
+        const gridW = Math.min(CENTER_AREA_WIDTH, containerW - 100); 
+        const gridH = Math.min(CENTER_AREA_HEIGHT, containerH - navHeight - 100);
+        
+        const numCards = cards.length;
+        const cardDiameter = cardSize + 20; // Kártya méret + kis térköz (ütközési távolság)
+        
+        // Oszlopok és sorok számának meghatározása
+        let cols = Math.floor(gridW / cardDiameter);
+        cols = Math.max(1, Math.min(cols, numCards)); 
+        const rows = Math.ceil(numCards / cols);
+        
+        // Aktuális használt rács méret
+        const usedW = cols * cardDiameter;
+        const usedH = rows * cardDiameter;
+        
+        // Start pozíció (bal felső sarok)
+        const startX = centerX - usedW / 2;
+        const startY = centerY - usedH / 2;
+
+        cards.forEach((card, index) => {
+            const col = index % cols;
+            const row = Math.floor(index / cols);
+            
+            // Célpozíció (A cella bal felső sarka)
+            const targetX = startX + col * cardDiameter + (cardDiameter - cardSize) / 2;
+            const targetY = startY + row * cardDiameter + (cardDiameter - cardSize) / 2;
+
+            card.targetX = targetX;
+            card.targetY = targetY;
+            
+            // Z pozíció a szűrésnél egységes, elöl lévő legyen
+            card.baseZ = maxZ / 4; 
+        });
+    }
+
+    // ----------------------------------------------------------------
+    // KÁRTYÁK LÉTREHOZÁSA
+    // ----------------------------------------------------------------
     const cardElements = [];
     
-    // Első futtatás a kezdeti sebesség beállításához
     checkMobileState(); 
+    updateBounds();
 
     items.forEach(item => {
         const card = document.createElement('div');
         card.classList.add('card');
         
-        // Kártya tartalmának generálása
         card.innerHTML = `
-            <img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/65?text=Logo'">
+            <img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/70?text=Logo'">
             <h3>${item.name}</h3>
         `;
         
-        // A kártya kezdeti helyének és sebességének beállítása
         const startXRange = 100 - (2 * PADDING_PERCENTAGE_X);
         const startYRange = 100 - (2 * PADDING_PERCENTAGE_Y);
 
         const x = (Math.random() * startXRange) + PADDING_PERCENTAGE_X; 
         const y = (Math.random() * startYRange) + PADDING_PERCENTAGE_Y; 
-        
         const z = Math.random() * (maxZ - minZ) + minZ; 
         
-        const vx = ((Math.random() - 0.5) * maxSpeed * 2) + (Math.sign(Math.random() - 0.5) * minStartSpeed);
-        const vy = ((Math.random() - 0.5) * maxSpeed * 2) + (Math.sign(Math.random() - 0.5) * minStartSpeed);
+        const vx = ((Math.random() - 0.5) * maxSpeed * 2);
+        const vy = ((Math.random() - 0.5) * maxSpeed * 2);
 
         const data = {
             element: card,
@@ -321,53 +396,64 @@ window.onload = () => {
             originalData: item,
             pixelX: 0, 
             pixelY: 0,
+            targetX: undefined, // Célpozíció a középre húzáshoz
+            targetY: undefined,
             isDragging: false,
-            canClick: true
+            canClick: true,
+            isHovering: false
         };
+        
+        const rangeX = cachedBounds.maxX - cachedBounds.minX;
+        const rangeY = cachedBounds.maxY - cachedBounds.minY;
+        const normalizedX = (data.x - PADDING_PERCENTAGE_X) / (100 - 2 * PADDING_PERCENTAGE_X);
+        const normalizedY = (data.y - PADDING_PERCENTAGE_Y) / (100 - 2 * PADDING_PERCENTAGE_Y);
 
-        // --- EGÉR ÉS ÉRINTÉS ESÉNYKEZELÉS ---
+        data.pixelX = cachedBounds.minX + (normalizedX * rangeX);
+        data.pixelY = cachedBounds.minY + (normalizedY * rangeY);
+
+        // --- ESEMÉNYKEZELŐK AZ ELEMEKEN ---
         
         card.addEventListener('mouseenter', () => {
-            data.isHovering = true;
-            data.element.classList.add('hovering');
-            updateDimmedState();
+            if (!isMobileView) {
+                data.isHovering = true;
+                updateDimmedState();
+            }
         });
 
         card.addEventListener('mouseleave', () => {
-            data.isHovering = false;
-            data.element.classList.remove('hovering');
-            updateDimmedState();
+            if (!isMobileView) {
+                data.isHovering = false;
+                updateDimmedState();
+            }
         });
         
-        card.addEventListener('mousedown', (e) => {
-            if (e.button !== 0) return; 
+        const startHandler = (e) => {
+            if (data.element.classList.contains('filtered-out') || data.element.classList.contains('dimmed')) return;
             
-            e.preventDefault();
-            draggedItem = data;
-            draggedItem.isDragging = false;
-            draggedItem.canClick = true; 
-            dragStartX = e.clientX;
-            dragStartY = e.clientY;
-        });
-        
-        // Mobilos érintés kezdet
-        card.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            
+            e.preventDefault(); 
             draggedItem = data;
             draggedItem.isDragging = false;
             draggedItem.canClick = true; 
             
-            const touch = e.touches[0];
-            dragStartX = touch.clientX;
-            dragStartY = touch.clientY;
-        }, { passive: false }); 
+            const client = e.type.startsWith('touch') ? e.touches[0] : e;
+            dragStartX = client.clientX;
+            dragStartY = client.clientY;
+            
+            const cardRect = draggedItem.element.getBoundingClientRect();
+            dragOffsetX = client.clientX - cardRect.left;
+            dragOffsetY = client.clientY - cardRect.top;
+        };
+        
+        card.addEventListener('mousedown', startHandler);
+        card.addEventListener('touchstart', startHandler, { passive: false }); 
 
         cardElements.push(data);
         container.appendChild(card);
     });
     
-    // Globális mozgás és elengedés (document)
+    // ----------------------------------------------------------------
+    // GLOBÁLIS DRAG KEZELÉS
+    // ----------------------------------------------------------------
     
     document.addEventListener('mousemove', handleMove);
     document.addEventListener('touchmove', handleMove, { passive: false }); 
@@ -382,9 +468,7 @@ window.onload = () => {
         const dy = clientY - dragStartY;
         
         if (!draggedItem.isDragging) {
-            
             if (Math.abs(dx) > dragDistanceThreshold || Math.abs(dy) > dragDistanceThreshold) {
-                
                 draggedItem.isDragging = true;
                 draggedItem.canClick = false; 
                 draggedItem.element.classList.add('dragging');
@@ -397,21 +481,22 @@ window.onload = () => {
         }
         
         if (draggedItem.isDragging) {
-            const cardHalf = cardSize / 2;
-            draggedItem.pixelX = clientX - cardHalf;
-            draggedItem.pixelY = clientY - cardHalf;
+            let newPixelX = clientX - dragOffsetX;
+            let newPixelY = clientY - dragOffsetY;
+            
+            draggedItem.pixelX = Math.max(cachedBounds.minX, Math.min(cachedBounds.maxX, newPixelX));
+            draggedItem.pixelY = Math.max(cachedBounds.minY, Math.min(cachedBounds.maxY, newPixelY));
         }
     }
 
-
     document.addEventListener('mouseup', handleEnd);
     document.addEventListener('touchend', handleEnd);
+    document.addEventListener('touchcancel', handleEnd);
 
     function handleEnd(e) {
         if (!draggedItem) return;
         
         if (draggedItem.canClick && !draggedItem.isDragging) {
-             // MODAL MEGJELENÍTÉS AZ EGYEDI ITEM ADATAIVAL
              openModal(draggedItem.originalData);
         }
         
@@ -419,207 +504,129 @@ window.onload = () => {
             draggedItem.element.classList.remove('dragging');
             draggedItem.isDragging = false;
             
-            // Sebesség generálása az aktuális maxSpeed értékkel
-            const newVx = (Math.random() - 0.5) * maxSpeed; 
-            const newVy = (Math.random() - 0.5) * maxSpeed; 
-            
-            draggedItem.vx = newVx;
-            draggedItem.vy = newVy;
+            draggedItem.vx = (Math.random() - 0.5) * maxSpeed; 
+            draggedItem.vy = (Math.random() - 0.5) * maxSpeed; 
         }
         
         draggedItem = null;
     }
 
-
-    // 3. Segéd-függvények
+    // ----------------------------------------------------------------
+    // FIZIKAI MOTOR (ANIMÁCIÓS LOOP)
+    // ----------------------------------------------------------------
     
-    // Ütközési szögrotációhoz
-    function rotate(vx, vy, angle) {
-        return {
-            vx: vx * Math.cos(angle) + vy * Math.sin(angle),
-            vy: vy * Math.cos(angle) - vx * Math.sin(angle)
-        };
-    }
-    
-    // Halványítás logikája
-    function updateDimmedState() {
-        const currentlyHovered = cardElements.some(c => c.isHovering);
-        
-        cardElements.forEach(item => {
-            if (currentlyHovered && !item.isHovering && !item.element.classList.contains('filtered-out')) {
-                item.element.classList.add('dimmed');
-            } else {
-                item.element.classList.remove('dimmed');
-            }
-        });
-    }
-
-    // 4. Fizikai adatok és határok
-    const cardSize = 110; 
-    const navHeight = 70; 
-    const collisionDistance = 120; // 110px-es kártyához 120px ütközési távolság
-
-    let P_MIN_X = 0;
-    let P_MAX_X = 0;
-    let P_MIN_Y = 0;
-    let P_MAX_Y = 0;
-    
-    // Képernyő határainak frissítése
-    function calculateBounds(w, h) {
-        P_MIN_X = (w * PADDING_PERCENTAGE_X / 100); 
-        P_MAX_X = w - (w * PADDING_PERCENTAGE_X / 100) - cardSize; 
-        
-        P_MIN_Y = navHeight + (h * PADDING_PERCENTAGE_Y / 100); 
-        P_MAX_Y = h - (h * PADDING_PERCENTAGE_Y / 100) - cardSize;
-    }
-
-    // Kezdeti pozíciók beállítása
-    (function initializePositions() {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        calculateBounds(w, h);
-        
-        cardElements.forEach(item => {
-            const rangeX = P_MAX_X - P_MIN_X;
-            const rangeY = P_MAX_Y - P_MIN_Y;
-            
-            const normalizedX = (item.x - PADDING_PERCENTAGE_X) / (100 - 2 * PADDING_PERCENTAGE_X);
-            const normalizedY = (item.y - PADDING_PERCENTAGE_Y) / (100 - 2 * PADDING_PERCENTAGE_Y);
-
-            item.pixelX = P_MIN_X + (normalizedX * rangeX);
-            item.pixelY = P_MIN_Y + (normalizedY * rangeY);
-        });
-    })();
-
-
-    // 5. Animációs hurok (Fizikai motor)
     function animate() {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
         
-        calculateBounds(w, h);
-
-        const minXBound = P_MIN_X;
-        const maxXBound = P_MAX_X; 
-        const minYBound = P_MIN_Y; 
-        const maxYBound = P_MAX_Y; 
-
         cardElements.forEach(item => {
-            
-            let pixelX = item.pixelX; 
-            let pixelY = item.pixelY;
-            
-            const currentZ = item.baseZ;
-            const currentScale = 1;
-
-            if (item.isDragging) {
-                // Drag: a kártya követi az egeret/ujjat a korlátokon belül
-                pixelX = Math.max(minXBound, Math.min(maxXBound, pixelX));
-                pixelY = Math.max(minYBound, Math.min(maxYBound, pixelY));
-
-                item.pixelX = pixelX;
-                item.pixelY = pixelY;
-
-            } else {
+            // 1. HA VAN KERESÉS, ÉS EZ EGY TALÁLAT: Középre húzás (Lerp)
+            if (isSearching && item.targetX !== undefined) {
                 
-                // Szabad mozgás
+                // Lerp (Lineáris Interpoláció) a sima mozgásért
+                item.pixelX += (item.targetX - item.pixelX) * CENTER_TARGET_DAMPING;
+                item.pixelY += (item.targetY - item.pixelY) * CENTER_TARGET_DAMPING;
                 
-                // Sebesség korlátozása (remegés elkerülése és nézet-specifikus sebesség)
-                item.vx = Math.min(Math.max(item.vx, -maxSpeed), maxSpeed);
-                item.vy = Math.min(Math.max(item.vy, -maxSpeed), maxSpeed);
+                // Kikapcsoljuk a fizikát
+                item.vx = 0; 
+                item.vy = 0;
+            } 
+            // 2. HA KI VAN SZŰRVE: Nem mozog, sebesség nulla
+            else if (item.element.classList.contains('filtered-out')) {
+                item.vx = 0;
+                item.vy = 0;
+            } 
+            // 3. SZABAD MOZGÁS (NINCS KERESÉS ÉS NINCS DRAG)
+            else if (!item.isDragging) {
                 
-                pixelX += item.vx;
-                pixelY += item.vy;
+                // Sebesség csillapítás
+                if (Math.abs(item.vx) > maxSpeed) item.vx *= 0.95;
+                if (Math.abs(item.vy) > maxSpeed) item.vy *= 0.95;
 
-                // Ütközés a keretekkel (élfalak)
-                if (pixelX < minXBound) { 
-                    item.vx *= -1; 
-                    pixelX = minXBound; 
-                } else if (pixelX > maxXBound) {
-                    item.vx *= -1; 
-                    pixelX = maxXBound; 
+                let nextX = item.pixelX + item.vx;
+                let nextY = item.pixelY + item.vy;
+
+                // Falak ellenőrzése
+                if (nextX < cachedBounds.minX) { 
+                    item.vx = Math.abs(item.vx); 
+                    nextX = cachedBounds.minX; 
+                } else if (nextX > cachedBounds.maxX) { 
+                    item.vx = -Math.abs(item.vx); 
+                    nextX = cachedBounds.maxX; 
                 }
                 
-                if (pixelY < minYBound) {
-                    item.vy *= -1; 
-                    pixelY = minYBound; 
-                } else if (pixelY > maxYBound) {
-                    item.vy *= -1; 
-                    pixelY = maxYBound; 
+                if (nextY < cachedBounds.minY) { 
+                    item.vy = Math.abs(item.vy); 
+                    nextY = cachedBounds.minY; 
+                } else if (nextY > cachedBounds.maxY) { 
+                    item.vy = -Math.abs(item.vy); 
+                    nextY = cachedBounds.maxY; 
                 }
                 
-                item.pixelX = pixelX;
-                item.pixelY = pixelY;
-                
+                item.pixelX = nextX;
+                item.pixelY = nextY;
             }
             
-            // ----------------------------------------------------------------------------------
-            // Kártyák közti ÜTKÖZÉSI FIZIKA (CSAK ASZTALI NÉZETBEN)
-            // ----------------------------------------------------------------------------------
-            if (!item.isDragging && !isMobileView) { // Ha nem húzzuk ÉS nem mobil nézet
+            // 4. Ütközés detektálás (Csak akkor, ha nincs keresés)
+            if (!isSearching && !item.isDragging && !isMobileView && !item.element.classList.contains('filtered-out')) { 
                 
-                const currentCenter1X = item.pixelX + (cardSize / 2);
-                const currentCenter1Y = item.pixelY + (cardSize / 2);
+                const r = cardSize / 2;
+                const c1x = item.pixelX + r;
+                const c1y = item.pixelY + r;
 
                 for (let i = cardElements.indexOf(item) + 1; i < cardElements.length; i++) {
-                    const otherItem = cardElements[i];
+                    const other = cardElements[i];
 
-                    // Csak a látható, nem húzott elemekkel ütköztet
-                    if (!item.element.classList.contains('filtered-out') && !otherItem.element.classList.contains('filtered-out') && !otherItem.isDragging) {
+                    if (other.element.classList.contains('filtered-out') || other.isDragging) continue;
                         
-                        const currentCenter2X = otherItem.pixelX + (cardSize / 2);
-                        const currentCenter2Y = otherItem.pixelY + (cardSize / 2);
+                    const c2x = other.pixelX + r;
+                    const c2y = other.pixelY + r;
 
-                        const dx = currentCenter2X - currentCenter1X;
-                        const dy = currentCenter2Y - currentCenter1Y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
+                    const dx = c2x - c1x;
+                    const dy = c2y - c1y;
+                    
+                    if (Math.abs(dx) > collisionDistance || Math.abs(dy) > collisionDistance) continue;
+
+                    const distanceSq = dx*dx + dy*dy;
+                    const minDistanceSq = collisionDistance * collisionDistance;
+                    
+                    if (distanceSq < minDistanceSq) {
+                        const distance = Math.sqrt(distanceSq);
+                        const angle = Math.atan2(dy, dx);
                         
-                        // Ütközés történt
-                        if (distance < collisionDistance) {
-                            
-                            // Ütközési fizika (2D rugalmas ütközés 1D-re redukálva)
-                            const angle = Math.atan2(dy, dx);
-                            
-                            const v1 = rotate(item.vx, item.vy, angle);
-                            const v2 = rotate(otherItem.vx, otherItem.vy, angle);
-                            
-                            // Cseréjük a sebességeket az ütközési tengelyen
-                            const u1 = v1.vx;
-                            const u2 = v2.vx;
-                            v1.vx = u2; 
-                            v2.vx = u1;
-                            
-                            // Visszaforgatás a globális koordinátarendszerbe
-                            const finalV1 = rotate(v1.vx, v1.vy, -angle);
-                            const finalV2 = rotate(v2.vx, v2.vy, -angle);
-                            
-                            item.vx = finalV1.vx;
-                            item.vy = finalV1.vy;
-                            otherItem.vx = finalV2.vx;
-                            otherItem.vy = finalV2.vy;
-                            
-                            // Elválasztás (Átfedés megszüntetése)
-                            const overlap = collisionDistance - distance;
-                            const separation = overlap / 2;
-                            
-                            item.pixelX -= (separation * Math.cos(angle));
-                            item.pixelY -= (separation * Math.sin(angle));
-                            otherItem.pixelX += (separation * Math.cos(angle));
-                            otherItem.pixelY += (separation * Math.sin(angle));
-                            
-                            // Ütközés utáni sebesség korlátozása (stabilitás)
-                            item.vx = Math.min(Math.max(item.vx, -maxSpeed), maxSpeed);
-                            item.vy = Math.min(Math.max(item.vy, -maxSpeed), maxSpeed);
-                            otherItem.vx = Math.min(Math.max(otherItem.vx, -maxSpeed), maxSpeed);
-                            otherItem.vy = Math.min(Math.max(otherItem.vy, -maxSpeed), maxSpeed);
-                        }
+                        const v1 = rotate(item.vx, item.vy, angle);
+                        const v2 = rotate(other.vx, other.vy, angle);
+                        
+                        const u1 = v2.vx; 
+                        const u2 = v1.vx;
+                        
+                        const finalV1 = rotate(u1, v1.vy, -angle);
+                        const finalV2 = rotate(u2, v2.vy, -angle);
+                        
+                        item.vx = finalV1.vx;
+                        item.vy = finalV1.vy;
+                        other.vx = finalV2.vx;
+                        other.vy = finalV2.vy;
+                        
+                        const overlap = collisionDistance - distance;
+                        const separation = overlap / 2;
+                        
+                        item.pixelX -= (separation * Math.cos(angle));
+                        item.pixelY -= (separation * Math.sin(angle));
+                        other.pixelX += (separation * Math.cos(angle));
+                        other.pixelY += (separation * Math.sin(angle));
                     }
                 }
             } 
-            // ----------------------------------------------------------------------------------
 
-            // Stílus alkalmazása
-            item.element.style.transform = `translate3d(${item.pixelX}px, ${item.pixelY}px, ${currentZ}px) scale(${currentScale})`;
+            // 5. MEGJELENÍTÉS (RENDER)
+            const isHidden = item.element.classList.contains('filtered-out');
+            
+            // Ha van keresés, a találatok Z-je közelebbi (kivétel, ha el van rejtve)
+            const targetZ = (isSearching && !isHidden && item.targetX !== undefined) ? maxZ / 4 : item.baseZ; 
+
+            const zPos = isHidden ? 0 : targetZ;
+            const scale = isHidden ? 0 : (1 - (targetZ / maxZ) * 0.2); 
+            
+            item.element.style.transform = `translate3d(${item.pixelX}px, ${item.pixelY}px, ${zPos}px) scale(${scale})`;
             item.element.style.top = '0'; 
             item.element.style.left = '0';
         });
@@ -627,40 +634,94 @@ window.onload = () => {
         requestAnimationFrame(animate);
     }
 
+    // Animáció indítása
     animate();
     
-    // 7. Keresés
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase().trim();
+    // ----------------------------------------------------------------
+    // KERESÉS ÉS EGYÉB FUNKCIÓK
+    // ----------------------------------------------------------------
+
+    // Resize kezelése
+    window.addEventListener('resize', () => {
+        checkMobileState(); 
+        updateBounds();
+        
+        // Ha van aktív keresés, frissíteni kell a középső rácsot is
+        if (isSearching) {
+            const matchingCards = cardElements.filter(item => item.element.classList.contains('filtered-out') === false);
+            calculateCenteredGrid(matchingCards);
+        }
         
         cardElements.forEach(item => {
-            const isMatch = item.name.includes(searchTerm);
-            
-            if (searchTerm === "") {
-                item.element.classList.remove('filtered-out');
-                item.element.style.pointerEvents = 'all';
-            } else if (isMatch) {
-                item.element.classList.remove('filtered-out');
-                item.element.style.pointerEvents = 'all';
-                // Szűréskor a Z tengelyt nullázzuk a jobb láthatóság érdekében
-                item.element.style.transform = `translate3d(${item.pixelX}px, ${item.pixelY}px, 0px) scale(1)`; 
-            } else {
-                item.element.classList.add('filtered-out');
-            }
+            item.pixelX = Math.max(cachedBounds.minX, Math.min(cachedBounds.maxX, item.pixelX));
+            item.pixelY = Math.max(cachedBounds.minY, Math.min(cachedBounds.maxY, item.pixelY));
         });
-        
-        // Pointer események kezelése, hogy csak a találatok legyenek aktívak keresés közben
-        if (searchTerm !== "") {
+
+        if (!isMobileView && navLinks.classList.contains('active')) {
+             hamburgerBtn.classList.remove('active');
+             navLinks.classList.remove('active');
+             container.style.pointerEvents = 'all';
+        }
+    });
+
+    // Kereső logika
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        const matchingCards = [];
+
+        // Törlés gomb megjelenítése/eltüntetése
+        if (searchTerm.length > 0) {
+            clearSearchBtn.style.display = 'block';
+        } else {
+            clearSearchBtn.style.display = 'none';
+        }
+
+
+        if (searchTerm === "") {
+            isSearching = false;
+            // Visszaállítás normál állapotra
+            cardElements.forEach(item => {
+                item.element.classList.remove('filtered-out');
+                item.element.style.pointerEvents = 'all';
+                item.targetX = undefined; 
+                item.targetY = undefined;
+            });
+        } else {
+            isSearching = true;
+
             cardElements.forEach(item => {
                 const isMatch = item.name.includes(searchTerm);
-                item.element.style.pointerEvents = isMatch ? 'all' : 'none';
+                
+                if (isMatch) {
+                    item.element.classList.remove('filtered-out');
+                    item.element.style.pointerEvents = 'all';
+                    matchingCards.push(item);
+                } else {
+                    item.element.classList.add('filtered-out');
+                    item.element.style.pointerEvents = 'none';
+                    item.targetX = undefined;
+                    item.targetY = undefined;
+                }
             });
+
+            // Központosítás csak ha van találat
+            if (matchingCards.length > 0) {
+                calculateCenteredGrid(matchingCards);
+            }
         }
         
         updateDimmedState();
     });
+    
+    // ÚJ: Kereső törlése gomb
+    clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = ''; // Input mező törlése
+        searchInput.dispatchEvent(new Event('input')); // Input esemény manuális kiváltása
+        clearSearchBtn.style.display = 'none';
+    });
 
-    // 8. Modal Funkciók (Logó részletei)
+
+    // Modal Megnyitás
     function openModal(item) {
         document.getElementById('modal-img').src = item.img; 
         document.getElementById('modal-title').innerText = item.name;
@@ -668,71 +729,56 @@ window.onload = () => {
         
         modal.classList.add('active');
         
-        // Kikapcsoljuk az interakciót a háttérrel
         container.style.pointerEvents = 'none';
         cardElements.forEach(item => {
             item.element.style.pointerEvents = 'none';
         });
-        document.body.style.overflow = 'hidden'; 
     }
 
+    // Modal Bezárás
     function closeModal() {
         modal.classList.remove('active');
         
         const searchTerm = searchInput.value.toLowerCase().trim();
         
-        // Visszaállítjuk az interakciót a keresési állapottól függően
-        if (searchTerm === "") {
+        if (searchTerm === "" && !navLinks.classList.contains('active')) {
             container.style.pointerEvents = 'all'; 
             cardElements.forEach(item => {
                 item.element.style.pointerEvents = 'all';
             });
-            
-        } else {
-            container.style.pointerEvents = 'none'; 
+        } else if (searchTerm !== "") {
             cardElements.forEach(item => {
                 const isMatch = item.name.includes(searchTerm);
                 item.element.style.pointerEvents = isMatch ? 'all' : 'none';
             });
         }
-        
-        // A modal bezárása után engedjük, hogy a body tartalmát lehessen görgetni
-        document.body.style.overflow = ''; 
     }
 
     closeBtn.addEventListener('click', closeModal);
-    
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             closeModal();
         }
     });
     
-    // 9. HAMBURGER FUNKCIÓ
+    // Hamburger Menü
     hamburgerBtn.addEventListener('click', () => {
         hamburgerBtn.classList.toggle('active');
         navLinks.classList.toggle('active');
         
         if (navLinks.classList.contains('active')) {
-            document.body.style.overflow = 'hidden';
             container.style.pointerEvents = 'none';
         } else {
             const searchTerm = searchInput.value.toLowerCase().trim();
-            
             if (searchTerm === "") {
                 container.style.pointerEvents = 'all';
             } else {
                 container.style.pointerEvents = 'none'; 
+                 cardElements.forEach(item => {
+                    const isMatch = item.name.includes(searchTerm);
+                    item.element.style.pointerEvents = isMatch ? 'all' : 'none';
+                });
             }
-            document.body.style.overflow = '';
         }
-    });
-    
-    // Ablak átméretezés kezelése (Frissíti a sebességet és a nézetet, megjeleníti/elrejti a figyelmeztetést)
-    window.addEventListener('resize', () => {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        calculateBounds(w, h);
-        checkMobileState(); 
     });
 };
