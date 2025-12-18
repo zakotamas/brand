@@ -8,58 +8,39 @@ window.onload = () => {
     const navLinks = document.getElementById('navLinks');
     const mobileWarningModal = document.getElementById('mobileWarningModal');
     const closeWarningBtn = document.getElementById('closeWarningBtn');
-    const clearSearchBtn = document.getElementById('clearSearchBtn'); // ÚJ
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
 
-    // LocalStorage kulcs a figyelmeztetéshez
     const WARNING_SEEN_KEY = 'mobileWarningSeen';
     
     // ----------------------------------------------------------------
     // KONFIGURÁCIÓ ÉS VÁLTOZÓK
     // ----------------------------------------------------------------
     
-    // Drag (Húzás) változók
     let draggedItem = null;
     const dragDistanceThreshold = 5; 
-    let dragStartX = 0;
-    let dragStartY = 0;
-    let dragOffsetX = 0;
-    let dragOffsetY = 0;
+    let dragStartX = 0, dragStartY = 0, dragOffsetX = 0, dragOffsetY = 0;
     
-    // Z tengely (Mélység)
-    const minZ = 0; 
-    const maxZ = 400; 
+    // JAVÍTÁS: Globális rétegrend számláló
+    let topZIndex = 50; 
     
-    // Falak margója (Padding) százalékban
     const PADDING_PERCENTAGE_X = 2; 
     const PADDING_PERCENTAGE_Y = 2;
-    
-    // Sebesség és Nézet beállítások
     const DESKTOP_MAX_SPEED = 0.08; 
     const MOBILE_BREAKPOINT = 768; 
     const MOBILE_MAX_SPEED = 0.03; 
     
-    // Aktuális állapot
     let maxSpeed = DESKTOP_MAX_SPEED;
     let isMobileView = window.innerWidth <= MOBILE_BREAKPOINT; 
-    
-    // Fizikai méretek (később frissülnek)
     let cardSize = 120;
-    const navHeight = 70; // Header magassága
-    let collisionDistance = 125; 
-
-    // Cache-elt határok a teljesítményért
+    const navHeight = 70; 
     let cachedBounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
 
-    // --- Központosításhoz ÚJ VÁLTOZÓK ---
     let isSearching = false;
-    const CENTER_TARGET_DAMPING = 0.15; // Sima átmenet sebessége
-    const CENTER_AREA_WIDTH = 600; // Központi rács max szélessége
-    const CENTER_AREA_HEIGHT = 400; // Központi rács max magassága
+    const CENTER_TARGET_DAMPING = 0.15; 
+    const CENTER_AREA_WIDTH = 600; 
+    const CENTER_AREA_HEIGHT = 400; 
 
-    // ----------------------------------------------------------------
-    // ADATOK (LOGÓK)
-    // ----------------------------------------------------------------
-    const items = [
+const items = [
         { id: 1, name: "Nike", img: "img/l1.png", desc: "A Nike Inc. egy amerikai multinacionális vállalat, amely cipők, ruházati cikkek, sportfelszerelések és kiegészítők tervezésével, fejlesztésével és gyártásával foglalkozik. Küldetésük az inspiráció és innováció eljuttatása minden sportolóhoz a világon." },
         { id: 2, name: "McDonald's", img: "img/l2.png", desc: "A világ vezető gyorséttermi lánca, több mint 100 országban van jelen. Folyamatosan fejleszti éttermi élményét és globális ellátási láncát a fenntarthatóság jegyében." },
         { id: 3, name: "Apple", img: "img/l3.png", desc: "Az Apple Inc. technológiai vállalat, amely fogyasztói elektronikát, számítógépes szoftvereket és online szolgáltatásokat fejleszt. Innovációjuk kulcsa a felhasználói élmény tökéletesítése." },
@@ -256,19 +237,12 @@ window.onload = () => {
     **/
     ];
 
-    // ----------------------------------------------------------------
-    // INICIALIZÁLÁS ÉS SEGÉDFÜGGVÉNYEK
-    // ----------------------------------------------------------------
-
     function checkMobileState() {
         isMobileView = window.innerWidth <= MOBILE_BREAKPOINT;
-
         if (isMobileView) {
             maxSpeed = MOBILE_MAX_SPEED;
             const seen = localStorage.getItem(WARNING_SEEN_KEY);
-            if (!seen) {
-                 mobileWarningModal.classList.add('active');
-            }
+            if (!seen) mobileWarningModal.classList.add('active');
         } else {
             maxSpeed = DESKTOP_MAX_SPEED;
             mobileWarningModal.classList.remove('active');
@@ -281,28 +255,16 @@ window.onload = () => {
     });
 
     function updateBounds() {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        
+        const w = window.innerWidth, h = window.innerHeight;
         cardSize = isMobileView ? 90 : 120;
-        collisionDistance = isMobileView ? 95 : 125;
-
         cachedBounds.minX = (w * PADDING_PERCENTAGE_X / 100);
         cachedBounds.maxX = w - (w * PADDING_PERCENTAGE_X / 100) - cardSize;
         cachedBounds.minY = navHeight + (h * PADDING_PERCENTAGE_Y / 100);
         cachedBounds.maxY = h - (h * PADDING_PERCENTAGE_Y / 100) - cardSize;
     }
-
-    function rotate(vx, vy, angle) {
-        return {
-            vx: vx * Math.cos(angle) + vy * Math.sin(angle),
-            vy: vy * Math.cos(angle) - vx * Math.sin(angle)
-        };
-    }
     
     function updateDimmedState() {
         const currentlyHovered = cardElements.some(c => c.isHovering);
-        
         cardElements.forEach(item => {
             if (currentlyHovered && !item.isHovering && !item.element.classList.contains('filtered-out')) {
                 item.element.classList.add('dimmed');
@@ -312,473 +274,194 @@ window.onload = () => {
         });
     }
 
-    // ÚJ FÜGGVÉNY: Középen elhelyezett rács kiszámítása
     function calculateCenteredGrid(cards) {
-        const containerW = window.innerWidth;
-        const containerH = window.innerHeight;
-        
-        // A képernyő közepéhez viszonyítva (figyelembe véve a fejlécmagasságot)
+        const containerW = window.innerWidth, containerH = window.innerHeight;
         const centerX = containerW / 2;
         const centerY = (containerH + navHeight) / 2; 
-
-        // Rács méret dinamikus számítása, hogy ne legyen nagyobb, mint a képernyő
         const gridW = Math.min(CENTER_AREA_WIDTH, containerW - 100); 
         const gridH = Math.min(CENTER_AREA_HEIGHT, containerH - navHeight - 100);
-        
         const numCards = cards.length;
-        const cardDiameter = cardSize + 20; // Kártya méret + kis térköz (ütközési távolság)
-        
-        // Oszlopok és sorok számának meghatározása
+        const cardDiameter = cardSize + 20; 
         let cols = Math.floor(gridW / cardDiameter);
         cols = Math.max(1, Math.min(cols, numCards)); 
         const rows = Math.ceil(numCards / cols);
-        
-        // Aktuális használt rács méret
-        const usedW = cols * cardDiameter;
-        const usedH = rows * cardDiameter;
-        
-        // Start pozíció (bal felső sarok)
-        const startX = centerX - usedW / 2;
-        const startY = centerY - usedH / 2;
+        const usedW = cols * cardDiameter, usedH = rows * cardDiameter;
+        const startX = centerX - usedW / 2, startY = centerY - usedH / 2;
 
         cards.forEach((card, index) => {
-            const col = index % cols;
-            const row = Math.floor(index / cols);
-            
-            // Célpozíció (A cella bal felső sarka)
-            const targetX = startX + col * cardDiameter + (cardDiameter - cardSize) / 2;
-            const targetY = startY + row * cardDiameter + (cardDiameter - cardSize) / 2;
-
-            card.targetX = targetX;
-            card.targetY = targetY;
-            
-            // Z pozíció a szűrésnél egységes, elöl lévő legyen
-            card.baseZ = maxZ / 4; 
+            const col = index % cols, row = Math.floor(index / cols);
+            card.targetX = startX + col * cardDiameter + (cardDiameter - cardSize) / 2;
+            card.targetY = startY + row * cardDiameter + (cardDiameter - cardSize) / 2;
         });
     }
 
-    // ----------------------------------------------------------------
-    // KÁRTYÁK LÉTREHOZÁSA
-    // ----------------------------------------------------------------
     const cardElements = [];
-    
     checkMobileState(); 
     updateBounds();
 
     items.forEach(item => {
         const card = document.createElement('div');
         card.classList.add('card');
+        card.innerHTML = `<img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/70?text=Logo'"><h3>${item.name}</h3>`;
         
-        card.innerHTML = `
-            <img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/70?text=Logo'">
-            <h3>${item.name}</h3>
-        `;
-        
-        const startXRange = 100 - (2 * PADDING_PERCENTAGE_X);
-        const startYRange = 100 - (2 * PADDING_PERCENTAGE_Y);
-
-        const x = (Math.random() * startXRange) + PADDING_PERCENTAGE_X; 
-        const y = (Math.random() * startYRange) + PADDING_PERCENTAGE_Y; 
-        const z = Math.random() * (maxZ - minZ) + minZ; 
-        
-        const vx = ((Math.random() - 0.5) * maxSpeed * 2);
-        const vy = ((Math.random() - 0.5) * maxSpeed * 2);
-
         const data = {
             element: card,
-            x: x, 
-            y: y, 
-            baseZ: z, 
-            vx: vx, 
-            vy: vy, 
-            mass: 1, 
-            name: item.name.toLowerCase(), 
+            pixelX: cachedBounds.minX + Math.random() * (cachedBounds.maxX - cachedBounds.minX),
+            pixelY: cachedBounds.minY + Math.random() * (cachedBounds.maxY - cachedBounds.minY),
+            // Kezdeti véletlen rétegrend
+            currentZ: Math.floor(Math.random() * 50),
+            vx: ((Math.random() - 0.5) * maxSpeed * 2),
+            vy: ((Math.random() - 0.5) * maxSpeed * 2),
+            name: item.name.toLowerCase(),
             originalData: item,
-            pixelX: 0, 
-            pixelY: 0,
-            targetX: undefined, // Célpozíció a középre húzáshoz
-            targetY: undefined,
-            isDragging: false,
-            canClick: true,
-            isHovering: false
+            isDragging: false, canClick: true, isHovering: false,
+            targetX: undefined, targetY: undefined
         };
-        
-        const rangeX = cachedBounds.maxX - cachedBounds.minX;
-        const rangeY = cachedBounds.maxY - cachedBounds.minY;
-        const normalizedX = (data.x - PADDING_PERCENTAGE_X) / (100 - 2 * PADDING_PERCENTAGE_X);
-        const normalizedY = (data.y - PADDING_PERCENTAGE_Y) / (100 - 2 * PADDING_PERCENTAGE_Y);
 
-        data.pixelX = cachedBounds.minX + (normalizedX * rangeX);
-        data.pixelY = cachedBounds.minY + (normalizedY * rangeY);
-
-        // --- ESEMÉNYKEZELŐK AZ ELEMEKEN ---
-        
-        card.addEventListener('mouseenter', () => {
-            if (!isMobileView) {
-                data.isHovering = true;
-                updateDimmedState();
-            }
-        });
-
-        card.addEventListener('mouseleave', () => {
-            if (!isMobileView) {
-                data.isHovering = false;
-                updateDimmedState();
-            }
-        });
+        card.addEventListener('mouseenter', () => { if (!isMobileView) { data.isHovering = true; updateDimmedState(); }});
+        card.addEventListener('mouseleave', () => { if (!isMobileView) { data.isHovering = false; updateDimmedState(); }});
         
         const startHandler = (e) => {
             if (data.element.classList.contains('filtered-out') || data.element.classList.contains('dimmed')) return;
-            
             e.preventDefault(); 
             draggedItem = data;
-            draggedItem.isDragging = false;
+
+            // JAVÍTÁS: Megfogáskor a legfelső rétegre kerül, és ott is marad
+            topZIndex++;
+            draggedItem.currentZ = topZIndex;
+
+            draggedItem.isDragging = false; 
             draggedItem.canClick = true; 
-            
             const client = e.type.startsWith('touch') ? e.touches[0] : e;
-            dragStartX = client.clientX;
-            dragStartY = client.clientY;
-            
+            dragStartX = client.clientX; dragStartY = client.clientY;
             const cardRect = draggedItem.element.getBoundingClientRect();
-            dragOffsetX = client.clientX - cardRect.left;
+            dragOffsetX = client.clientX - cardRect.left; 
             dragOffsetY = client.clientY - cardRect.top;
         };
         
         card.addEventListener('mousedown', startHandler);
         card.addEventListener('touchstart', startHandler, { passive: false }); 
-
         cardElements.push(data);
         container.appendChild(card);
     });
-    
-    // ----------------------------------------------------------------
-    // GLOBÁLIS DRAG KEZELÉS
-    // ----------------------------------------------------------------
-    
-    document.addEventListener('mousemove', handleMove);
-    document.addEventListener('touchmove', handleMove, { passive: false }); 
 
     function handleMove(e) {
         if (!draggedItem) return;
-
         const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
         const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-
-        const dx = clientX - dragStartX;
-        const dy = clientY - dragStartY;
         
         if (!draggedItem.isDragging) {
-            if (Math.abs(dx) > dragDistanceThreshold || Math.abs(dy) > dragDistanceThreshold) {
-                draggedItem.isDragging = true;
-                draggedItem.canClick = false; 
+            if (Math.abs(clientX - dragStartX) > dragDistanceThreshold || Math.abs(clientY - dragStartY) > dragDistanceThreshold) {
+                draggedItem.isDragging = true; draggedItem.canClick = false; 
                 draggedItem.element.classList.add('dragging');
-                
-                draggedItem.vx = 0;
-                draggedItem.vy = 0;
-            } else {
-                return;
             }
         }
-        
         if (draggedItem.isDragging) {
-            let newPixelX = clientX - dragOffsetX;
-            let newPixelY = clientY - dragOffsetY;
-            
-            draggedItem.pixelX = Math.max(cachedBounds.minX, Math.min(cachedBounds.maxX, newPixelX));
-            draggedItem.pixelY = Math.max(cachedBounds.minY, Math.min(cachedBounds.maxY, newPixelY));
+            draggedItem.pixelX = Math.max(cachedBounds.minX, Math.min(cachedBounds.maxX, clientX - dragOffsetX));
+            draggedItem.pixelY = Math.max(cachedBounds.minY, Math.min(cachedBounds.maxY, clientY - dragOffsetY));
         }
     }
 
-    document.addEventListener('mouseup', handleEnd);
-    document.addEventListener('touchend', handleEnd);
-    document.addEventListener('touchcancel', handleEnd);
-
-    function handleEnd(e) {
+    function handleEnd() {
         if (!draggedItem) return;
-        
-        if (draggedItem.canClick && !draggedItem.isDragging) {
-             openModal(draggedItem.originalData);
-        }
-        
+        if (draggedItem.canClick && !draggedItem.isDragging) openModal(draggedItem.originalData);
         if (draggedItem.isDragging) {
             draggedItem.element.classList.remove('dragging');
-            draggedItem.isDragging = false;
-            
             draggedItem.vx = (Math.random() - 0.5) * maxSpeed; 
             draggedItem.vy = (Math.random() - 0.5) * maxSpeed; 
         }
-        
         draggedItem = null;
     }
 
-    // ----------------------------------------------------------------
-    // FIZIKAI MOTOR (ANIMÁCIÓS LOOP)
-    // ----------------------------------------------------------------
-    
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('touchmove', handleMove, { passive: false }); 
+    document.addEventListener('mouseup', handleEnd);
+    document.addEventListener('touchend', handleEnd);
+
     function animate() {
-        
         cardElements.forEach(item => {
-            // 1. HA VAN KERESÉS, ÉS EZ EGY TALÁLAT: Középre húzás (Lerp)
             if (isSearching && item.targetX !== undefined) {
-                
-                // Lerp (Lineáris Interpoláció) a sima mozgásért
                 item.pixelX += (item.targetX - item.pixelX) * CENTER_TARGET_DAMPING;
                 item.pixelY += (item.targetY - item.pixelY) * CENTER_TARGET_DAMPING;
-                
-                // Kikapcsoljuk a fizikát
-                item.vx = 0; 
-                item.vy = 0;
-            } 
-            // 2. HA KI VAN SZŰRVE: Nem mozog, sebesség nulla
-            else if (item.element.classList.contains('filtered-out')) {
-                item.vx = 0;
-                item.vy = 0;
-            } 
-            // 3. SZABAD MOZGÁS (NINCS KERESÉS ÉS NINCS DRAG)
-            else if (!item.isDragging) {
-                
-                // Sebesség csillapítás
-                if (Math.abs(item.vx) > maxSpeed) item.vx *= 0.95;
-                if (Math.abs(item.vy) > maxSpeed) item.vy *= 0.95;
-
+                item.vx = 0; item.vy = 0;
+            } else if (!item.element.classList.contains('filtered-out') && !item.isDragging) {
                 let nextX = item.pixelX + item.vx;
                 let nextY = item.pixelY + item.vy;
-
-                // Falak ellenőrzése
-                if (nextX < cachedBounds.minX) { 
-                    item.vx = Math.abs(item.vx); 
-                    nextX = cachedBounds.minX; 
-                } else if (nextX > cachedBounds.maxX) { 
-                    item.vx = -Math.abs(item.vx); 
-                    nextX = cachedBounds.maxX; 
-                }
-                
-                if (nextY < cachedBounds.minY) { 
-                    item.vy = Math.abs(item.vy); 
-                    nextY = cachedBounds.minY; 
-                } else if (nextY > cachedBounds.maxY) { 
-                    item.vy = -Math.abs(item.vy); 
-                    nextY = cachedBounds.maxY; 
-                }
-                
-                item.pixelX = nextX;
-                item.pixelY = nextY;
+                if (nextX < cachedBounds.minX || nextX > cachedBounds.maxX) item.vx *= -1;
+                if (nextY < cachedBounds.minY || nextY > cachedBounds.maxY) item.vy *= -1;
+                item.pixelX = Math.max(cachedBounds.minX, Math.min(cachedBounds.maxX, nextX));
+                item.pixelY = Math.max(cachedBounds.minY, Math.min(cachedBounds.maxY, nextY));
             }
             
-            // 4. Ütközés detektálás (Csak akkor, ha nincs keresés)
-            if (!isSearching && !item.isDragging && !isMobileView && !item.element.classList.contains('filtered-out')) { 
-                
-                const r = cardSize / 2;
-                const c1x = item.pixelX + r;
-                const c1y = item.pixelY + r;
-
-                for (let i = cardElements.indexOf(item) + 1; i < cardElements.length; i++) {
-                    const other = cardElements[i];
-
-                    if (other.element.classList.contains('filtered-out') || other.isDragging) continue;
-                        
-                    const c2x = other.pixelX + r;
-                    const c2y = other.pixelY + r;
-
-                    const dx = c2x - c1x;
-                    const dy = c2y - c1y;
-                    
-                    if (Math.abs(dx) > collisionDistance || Math.abs(dy) > collisionDistance) continue;
-
-                    const distanceSq = dx*dx + dy*dy;
-                    const minDistanceSq = collisionDistance * collisionDistance;
-                    
-                    if (distanceSq < minDistanceSq) {
-                        const distance = Math.sqrt(distanceSq);
-                        const angle = Math.atan2(dy, dx);
-                        
-                        const v1 = rotate(item.vx, item.vy, angle);
-                        const v2 = rotate(other.vx, other.vy, angle);
-                        
-                        const u1 = v2.vx; 
-                        const u2 = v1.vx;
-                        
-                        const finalV1 = rotate(u1, v1.vy, -angle);
-                        const finalV2 = rotate(u2, v2.vy, -angle);
-                        
-                        item.vx = finalV1.vx;
-                        item.vy = finalV1.vy;
-                        other.vx = finalV2.vx;
-                        other.vy = finalV2.vy;
-                        
-                        const overlap = collisionDistance - distance;
-                        const separation = overlap / 2;
-                        
-                        item.pixelX -= (separation * Math.cos(angle));
-                        item.pixelY -= (separation * Math.sin(angle));
-                        other.pixelX += (separation * Math.cos(angle));
-                        other.pixelY += (separation * Math.sin(angle));
-                    }
-                }
-            } 
-
-            // 5. MEGJELENÍTÉS (RENDER)
             const isHidden = item.element.classList.contains('filtered-out');
-            
-            // Ha van keresés, a találatok Z-je közelebbi (kivétel, ha el van rejtve)
-            const targetZ = (isSearching && !isHidden && item.targetX !== undefined) ? maxZ / 4 : item.baseZ; 
+            const scale = isHidden ? 0 : 1; 
 
-            const zPos = isHidden ? 0 : targetZ;
-            const scale = isHidden ? 0 : (1 - (targetZ / maxZ) * 0.2); 
-            
-            item.element.style.transform = `translate3d(${item.pixelX}px, ${item.pixelY}px, ${zPos}px) scale(${scale})`;
-            item.element.style.top = '0'; 
-            item.element.style.left = '0';
+            // JAVÍTÁS: Z-index alkalmazása, de translate3d Z értéke fixen 0 a méret megtartásához
+            item.element.style.zIndex = item.currentZ;
+            item.element.style.transform = `translate3d(${item.pixelX}px, ${item.pixelY}px, 0px) scale(${scale})`;
         });
-
         requestAnimationFrame(animate);
     }
-
-    // Animáció indítása
     animate();
-    
-    // ----------------------------------------------------------------
-    // KERESÉS ÉS EGYÉB FUNKCIÓK
-    // ----------------------------------------------------------------
 
-    // Resize kezelése
-    window.addEventListener('resize', () => {
-        checkMobileState(); 
-        updateBounds();
-        
-        // Ha van aktív keresés, frissíteni kell a középső rácsot is
-        if (isSearching) {
-            const matchingCards = cardElements.filter(item => item.element.classList.contains('filtered-out') === false);
-            calculateCenteredGrid(matchingCards);
-        }
-        
-        cardElements.forEach(item => {
-            item.pixelX = Math.max(cachedBounds.minX, Math.min(cachedBounds.maxX, item.pixelX));
-            item.pixelY = Math.max(cachedBounds.minY, Math.min(cachedBounds.maxY, item.pixelY));
-        });
-
-        if (!isMobileView && navLinks.classList.contains('active')) {
-             hamburgerBtn.classList.remove('active');
-             navLinks.classList.remove('active');
-             container.style.pointerEvents = 'all';
-        }
-    });
-
-    // Kereső logika
     searchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase().trim();
         const matchingCards = [];
-
-        // Törlés gomb megjelenítése/eltüntetése
-        if (searchTerm.length > 0) {
-            clearSearchBtn.style.display = 'block';
-        } else {
-            clearSearchBtn.style.display = 'none';
-        }
-
-
+        clearSearchBtn.style.display = searchTerm.length > 0 ? 'block' : 'none';
         if (searchTerm === "") {
             isSearching = false;
-            // Visszaállítás normál állapotra
             cardElements.forEach(item => {
                 item.element.classList.remove('filtered-out');
-                item.element.style.pointerEvents = 'all';
-                item.targetX = undefined; 
-                item.targetY = undefined;
+                item.targetX = undefined; item.targetY = undefined;
             });
         } else {
             isSearching = true;
-
             cardElements.forEach(item => {
                 const isMatch = item.name.includes(searchTerm);
-                
                 if (isMatch) {
                     item.element.classList.remove('filtered-out');
-                    item.element.style.pointerEvents = 'all';
                     matchingCards.push(item);
                 } else {
                     item.element.classList.add('filtered-out');
-                    item.element.style.pointerEvents = 'none';
-                    item.targetX = undefined;
-                    item.targetY = undefined;
                 }
             });
-
-            // Központosítás csak ha van találat
-            if (matchingCards.length > 0) {
-                calculateCenteredGrid(matchingCards);
-            }
+            if (matchingCards.length > 0) calculateCenteredGrid(matchingCards);
         }
-        
         updateDimmedState();
     });
     
-    // ÚJ: Kereső törlése gomb
     clearSearchBtn.addEventListener('click', () => {
-        searchInput.value = ''; // Input mező törlése
-        searchInput.dispatchEvent(new Event('input')); // Input esemény manuális kiváltása
-        clearSearchBtn.style.display = 'none';
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
     });
 
-
-    // Modal Megnyitás
     function openModal(item) {
         document.getElementById('modal-img').src = item.img; 
         document.getElementById('modal-title').innerText = item.name;
         document.getElementById('modal-desc').innerText = item.desc;
-        
         modal.classList.add('active');
-        
         container.style.pointerEvents = 'none';
-        cardElements.forEach(item => {
-            item.element.style.pointerEvents = 'none';
-        });
     }
 
-    // Modal Bezárás
     function closeModal() {
         modal.classList.remove('active');
-        
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        
-        if (searchTerm === "" && !navLinks.classList.contains('active')) {
-            container.style.pointerEvents = 'all'; 
-            cardElements.forEach(item => {
-                item.element.style.pointerEvents = 'all';
-            });
-        } else if (searchTerm !== "") {
-            cardElements.forEach(item => {
-                const isMatch = item.name.includes(searchTerm);
-                item.element.style.pointerEvents = isMatch ? 'all' : 'none';
-            });
-        }
+        container.style.pointerEvents = 'all';
     }
 
     closeBtn.addEventListener('click', closeModal);
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
     
-    // Hamburger Menü
     hamburgerBtn.addEventListener('click', () => {
         hamburgerBtn.classList.toggle('active');
         navLinks.classList.toggle('active');
-        
-        if (navLinks.classList.contains('active')) {
-            container.style.pointerEvents = 'none';
-        } else {
-            const searchTerm = searchInput.value.toLowerCase().trim();
-            if (searchTerm === "") {
-                container.style.pointerEvents = 'all';
-            } else {
-                container.style.pointerEvents = 'none'; 
-                 cardElements.forEach(item => {
-                    const isMatch = item.name.includes(searchTerm);
-                    item.element.style.pointerEvents = isMatch ? 'all' : 'none';
-                });
-            }
+        container.style.pointerEvents = navLinks.classList.contains('active') ? 'none' : 'all';
+    });
+
+    window.addEventListener('resize', () => {
+        checkMobileState(); updateBounds();
+        if (isSearching) {
+            const matching = cardElements.filter(i => !i.element.classList.contains('filtered-out'));
+            calculateCenteredGrid(matching);
         }
     });
 };
