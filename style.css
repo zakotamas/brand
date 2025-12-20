@@ -18,7 +18,7 @@ header {
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 10000; /* Megemeltem, hogy mindig legfelül legyen */
+    z-index: 10000;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     height: 70px;
 }
@@ -63,10 +63,14 @@ header {
 
 .logo-short { display: none; }
 
+/* Módosított kereső wrapper a szűrő gombhoz */
 .search-wrapper {
     position: relative; 
     width: 100%;
-    max-width: 400px;
+    max-width: 450px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 #searchInput {
@@ -79,7 +83,7 @@ header {
     transition: all 0.3s;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
-    padding-right: 40px;
+    padding-right: 40px; /* Hely a törlés gombnak */
 }
 
 #searchInput:focus {
@@ -91,7 +95,7 @@ header {
 .clear-search-btn {
     position: absolute;
     top: 50%;
-    right: 5px;
+    right: 60px; /* Elmozdítva a szűrő gomb miatt */
     transform: translateY(-50%);
     background: none;
     border: none;
@@ -104,11 +108,56 @@ header {
     transition: opacity 0.2s, color 0.2s;
     display: none;
     line-height: 1;
+    z-index: 2;
 }
 
 .clear-search-btn:hover {
     opacity: 1;
     color: #4fc3f7;
+}
+
+/* --- ÚJ: Szűrő gomb stílus --- */
+.filter-toggle-btn {
+    background-color: #2c2c2c;
+    border: none;
+    border-radius: 8px;
+    width: 42px;
+    height: 38px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #e0e0e0;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.filter-toggle-btn:hover {
+    background-color: #383838;
+    color: #4fc3f7;
+}
+
+.filter-toggle-btn.active {
+    background-color: rgba(79, 195, 247, 0.2);
+    color: #4fc3f7;
+    border: 1px solid rgba(79, 195, 247, 0.5);
+}
+
+.active-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    background-color: #4fc3f7;
+    border-radius: 50%;
+    display: none;
+    box-shadow: 0 0 5px #4fc3f7;
+}
+
+.filter-toggle-btn.active .active-dot {
+    display: block;
 }
 
 nav ul {
@@ -162,7 +211,7 @@ nav ul li a:hover {
 .hamburger.active .bar3 { transform: rotate(45deg) translate(-5px, -6px); }
 
 /* --------------------------------------
- * KÁRTYA TÉR (JAVÍTOTT: FIX MÉRET)
+ * KÁRTYA TÉR
  * -------------------------------------- */
 
 .scene-container {
@@ -170,7 +219,6 @@ nav ul li a:hover {
     width: 100vw;
     height: 100vh;
     padding-top: 70px; 
-    /* JAVÍTÁS: Perspektíva kikapcsolva a fix méret érdekében */
     perspective: none; 
     box-sizing: border-box;
     overflow: hidden; 
@@ -194,7 +242,6 @@ nav ul li a:hover {
     top: 0;
     left: 0;
     will-change: transform; 
-    /* JAVÍTÁS: Kijelölés tiltása mozgatáskor */
     user-select: none;
     -webkit-user-select: none;
 }
@@ -219,7 +266,6 @@ nav ul li a:hover {
 
 .card:hover, .card.dragging {
     box-shadow: 0 0 30px rgba(79, 195, 247, 0.8), 0 0 15px rgba(255, 255, 255, 0.3);
-    /* z-index-et a JS kezeli */
     opacity: 1;
 }
 
@@ -227,7 +273,7 @@ nav ul li a:hover {
 .card.filtered-out { opacity: 0; pointer-events: none; }
 
 /* --------------------------------------
- * MODALOK ÉS EGYEBEK
+ * MODALOK
  * -------------------------------------- */
 
 .modal {
@@ -278,60 +324,251 @@ nav ul li a:hover {
     height: 150px; 
     object-fit: contain; 
     display: block; 
-    margin: 0 auto 25px auto; 
+    margin: 0 auto 15px auto; 
     filter: drop-shadow(0 0 8px rgba(79, 195, 247, 0.5));
     border-radius: 8px;
+}
+
+.category-badge {
+    display: inline-block;
+    background-color: rgba(79, 195, 247, 0.15);
+    color: #4fc3f7;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    border: 1px solid rgba(79, 195, 247, 0.3);
 }
 
 .modal-content h2 {
     color: #4fc3f7;
     margin-top: 0;
+    margin-bottom: 10px;
     font-size: 2.2em;
-    border-bottom: 2px solid rgba(79, 195, 247, 0.3);
-    padding-bottom: 10px;
+    padding-bottom: 5px;
 }
 
 .modal-content p {
     line-height: 1.8;
     text-align: justify;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
-.mobile-warning-modal {
+.details-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out, opacity 0.5s ease;
+    opacity: 0;
+    margin-top: 10px;
+    border-top: 1px dashed #333;
+    padding-top: 0;
+}
+
+.details-container.show {
+    max-height: 500px; 
+    opacity: 1;
+    padding-top: 15px;
+}
+
+.read-more-btn {
+    background-color: transparent;
+    border: 2px solid #4fc3f7;
+    color: #4fc3f7;
+    padding: 10px 25px;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.read-more-btn:hover {
+    background-color: #4fc3f7;
+    color: #121212;
+    box-shadow: 0 0 15px rgba(79, 195, 247, 0.5);
+}
+
+/* --- ÚJ: Szűrő Modal Stílus --- */
+.filter-modal {
+    display: none;
     position: fixed;
-    top: 0;
+    z-index: 20001; /* A másik modal felett is */
     left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.95);
-    z-index: 30000; 
-    display: none; 
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    box-sizing: border-box;
+    background-color: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(3px);
+    justify-content: center;
+    align-items: center; /* Mobilon inkább felülről? Most középre */
 }
 
-.mobile-warning-modal.active { display: flex; }
+.filter-modal.active {
+    display: flex;
+}
 
-.warning-content {
-    background-color: #1f1f1f;
-    color: #e0e0e0;
+.filter-content {
+    background-color: #1e1e1e;
     padding: 30px;
     border-radius: 15px;
-    border: 1px solid #ffc107;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    border: 1px solid #333;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 15px;
+}
+
+.filter-header h3 {
+    margin: 0;
+    color: #4fc3f7;
+}
+
+.close-filter-btn {
+    font-size: 24px;
+    cursor: pointer;
+    color: #888;
+    line-height: 1;
+}
+
+.close-filter-btn:hover { color: #fff; }
+
+.filter-subtitle {
+    font-size: 0.9em;
+    color: #aaa;
+    margin-bottom: 20px;
+}
+
+.filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.filter-chip {
+    background-color: #2c2c2c;
+    border: 1px solid #444;
+    color: #e0e0e0;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.filter-chip:hover {
+    background-color: #383838;
+    border-color: #666;
+}
+
+.filter-chip.active {
+    background-color: #4fc3f7;
+    color: #121212;
+    border-color: #4fc3f7;
+    font-weight: 600;
+    box-shadow: 0 0 10px rgba(79, 195, 247, 0.4);
+}
+
+.filter-actions {
     text-align: center;
 }
 
-#closeWarningBtn {
-    background-color: #4fc3f7;
+.reset-filter-btn {
+    background: none;
     border: none;
-    padding: 10px 25px;
+    color: #bbb;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.9em;
+    padding: 5px 10px;
+    transition: color 0.2s;
+}
+
+.reset-filter-btn:hover {
+    color: #fff;
+}
+
+/* --- Mobil Toast --- */
+.mobile-warning-toast {
+    position: fixed;
+    bottom: -100%; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 450px;
+    background-color: rgba(30, 30, 30, 0.95);
+    border: 1px solid rgba(79, 195, 247, 0.3);
+    border-radius: 12px;
+    z-index: 30000;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+    transition: bottom 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 15px 20px;
+    box-sizing: border-box;
+    display: flex; 
+}
+
+.mobile-warning-toast.active {
+    bottom: 20px;
+}
+
+.warning-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+}
+
+.warning-text h3 {
+    margin: 0 0 5px 0;
+    font-size: 1rem;
+    color: #ffc107;
+}
+
+.warning-text p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #bbb;
+    text-align: left;
+    line-height: 1.3;
+}
+
+#closeWarningBtn {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #4fc3f7;
+    border: 1px solid #4fc3f7;
+    padding: 8px 15px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
-    margin-top: 20px;
+    white-space: nowrap;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+#closeWarningBtn:hover {
+    background-color: #4fc3f7;
+    color: #121212;
 }
 
 @media (max-width: 768px) {
@@ -370,4 +607,8 @@ nav ul li a:hover {
     .mobile-menu-footer p { font-size: 0.9em; font-style: italic; color: #4fc3f7; opacity: 0.8; }
     .card { width: 90px; height: 90px; }
     .card img { max-width: 55px; max-height: 55px; }
+    
+    .search-wrapper { max-width: 100%; }
+    #searchInput { font-size: 16px; } /* iOS zoom fix */
+    .clear-search-btn { right: 55px; }
 }

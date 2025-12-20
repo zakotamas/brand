@@ -21,6 +21,12 @@
                 <div class="search-wrapper">
                     <input type="text" id="searchInput" placeholder="Keresés márkanévre...">
                     <button id="clearSearchBtn" class="clear-search-btn">X</button>
+                    <button id="filterToggleBtn" class="filter-toggle-btn" title="Szűrés kategóriák szerint">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
+                        <span id="activeFilterDot" class="active-dot"></span>
+                    </button>
                 </div>
             </div>
 
@@ -47,14 +53,12 @@
     <div class="scene-container" id="scene-container">
     </div>
     
-    <div class="mobile-warning-modal" id="mobileWarningModal">
+    <div class="mobile-warning-toast" id="mobileWarningModal">
         <div class="warning-content">
-            <h3>⚠️ Kijelző optimalizálás</h3>
-            <p>Ez az interaktív tartalom nagy képernyőre készült.</p>
-            <ul>
-                <li>▶️ Kérjük, távolítson (zoom out).</li>
-                <li>▶️ Forgassa el a készülékét.</li>
-            </ul>
+            <div class="warning-text">
+                <h3>⚠️ Optimalizálás</h3>
+                <p>Nagy képernyőre tervezve. A legjobb élményért távolítson vagy forgassa el!</p>
+            </div>
             <button id="closeWarningBtn">Rendben</button>
         </div>
     </div>
@@ -64,7 +68,33 @@
             <span class="close-btn">&times;</span>
             <img id="modal-img" src="" alt="">
             <h2 id="modal-title"></h2>
-            <p id="modal-desc"></p>
+            <p id="modal-category" class="category-badge"></p> <p id="modal-desc"></p>
+            
+            <div id="modal-details-container" class="details-container">
+                <p id="modal-details-text"></p>
+            </div>
+            <button id="readMoreBtn" class="read-more-btn">Tovább olvasok</button>
+        </div>
+    </div>
+
+    <div id="filterModal" class="filter-modal">
+        <div class="filter-content">
+            <div class="filter-header">
+                <h3>Kategória szűrő</h3>
+                <span id="closeFilterBtn" class="close-filter-btn">&times;</span>
+            </div>
+            <p class="filter-subtitle">Válassz egy kategóriát a szűkítéshez:</p>
+            <div class="filter-options" id="filterOptions">
+                <button class="filter-chip" data-category="tech">Technológia</button>
+                <button class="filter-chip" data-category="auto">Autóipar</button>
+                <button class="filter-chip" data-category="food">Étel & Ital</button>
+                <button class="filter-chip" data-category="fashion">Divat & Sport</button>
+                <button class="filter-chip" data-category="home">Otthon</button>
+                <button class="filter-chip" data-category="social">Közösségi Média</button>
+            </div>
+            <div class="filter-actions">
+                <button id="resetFilterBtn" class="reset-filter-btn">Minden mutatása (Reset)</button>
+            </div>
         </div>
     </div>
 
