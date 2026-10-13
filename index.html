@@ -19,9 +19,9 @@
 
             <div class="header-center">
                 <div class="search-wrapper">
-                    <input type="text" id="searchInput" placeholder="Keresés márkanévre...">
-                    <button id="clearSearchBtn" class="clear-search-btn">X</button>
-                    <button id="filterToggleBtn" class="filter-toggle-btn" title="Szűrés kategóriák szerint">
+                    <input type="text" id="searchInput" placeholder="Keresés névre, leírásra, kategóriára..." autocomplete="off">
+                    <button id="clearSearchBtn" class="clear-search-btn" aria-label="Keresés törlése">X</button>
+                    <button id="filterToggleBtn" class="filter-toggle-btn" title="Szűrés" aria-label="Szűrés">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                         </svg>
@@ -31,16 +31,29 @@
             </div>
 
             <div class="header-right">
+                <button id="authBtn" class="auth-btn" type="button" aria-label="Belépés / Regisztráció">
+                    <span class="auth-ico">👤</span><span class="auth-label" id="authLabel">Belépés</span>
+                </button>
                 <nav id="navLinks">
+                    <!-- Mobil nézetben a hamburger menübe ágyazott gyorsszűrők és kártyakeverés -->
+                    <div class="mobile-discover-section">
+                        <p class="mobile-menu-title">Gyorsszűrők</p>
+                        <div class="mobile-dtabs">
+                            <button class="dtab mobile-dtab active" data-tab="popular" type="button">🔥 Legnépszerűbb</button>
+                            <button class="dtab mobile-dtab" data-tab="new" type="button">🆕 Új cégek</button>
+                            <button class="dtab mobile-dtab" data-tab="premium" type="button">👑 Prémium</button>
+                        </div>
+                        <button id="mobileRandomBtn" class="mobile-dice-btn" type="button">🔀 Kártyák újrakeverése</button>
+                    </div>
                     <ul>
-                        <li><a href="https://form.jotform.com/253612357784060" target="_blank">Regisztráció</a></li>
+                        <li><a href="#info">Információ</a></li>
                         <li><a href="#contact">Kapcsolat</a></li>
                     </ul>
                     <div class="mobile-menu-footer">
                         <p>Brand univerzum - ahol a logók csillagként ragyognak</p>
                     </div>
                 </nav>
-                
+
                 <div class="hamburger" id="hamburgerBtn">
                     <div class="bar bar1"></div>
                     <div class="bar bar2"></div>
@@ -50,9 +63,23 @@
         </div>
     </header>
 
+    <!-- Asztali nézetű Felfedező sáv -->
+    <div class="discover-bar" id="discoverBar">
+        <div class="dtabs">
+            <button class="dtab active" data-tab="popular" type="button">🔥<span class="tl"> Legnépszerűbb</span></button>
+            <button class="dtab" data-tab="new" type="button">🆕<span class="tl"> Új cégek</span></button>
+            <button class="dtab" data-tab="premium" type="button">👑<span class="tl"> Prémium</span></button>
+        </div>
+        <div class="dlist" id="discoverList"></div>
+        <button id="randomBtn" class="dice" type="button" title="Kártyák újrakeverése" aria-label="Kártyák újrakeverése">🔀</button>
+    </div>
+
+    <div class="result-info" id="resultInfo"></div>
+    <div class="toast" id="toast" role="status"></div>
+
     <div class="scene-container" id="scene-container">
     </div>
-    
+
     <div class="mobile-warning-toast" id="mobileWarningModal">
         <div class="warning-content">
             <div class="warning-text">
@@ -68,8 +95,26 @@
             <span class="close-btn">&times;</span>
             <img id="modal-img" src="" alt="">
             <h2 id="modal-title"></h2>
-            <p id="modal-category" class="category-badge"></p> <p id="modal-desc"></p>
+            <div id="modal-badges" class="modal-badges"></div>
+            <p id="modal-category" class="category-badge"></p> 
             
+            <!-- Értékelési szekció (3. pont) -->
+            <div id="ratingSection" class="rating-section">
+                <p id="ratingPrompt" class="rating-prompt">Értékeld a logót (bejelentkezés szükséges):</p>
+                <div class="star-rating" id="starContainer">
+                    <button type="button" class="dollar-star" data-value="1" aria-label="1 dollár">💲</button>
+                    <button type="button" class="dollar-star" data-value="2" aria-label="2 dollár">💲</button>
+                    <button type="button" class="dollar-star" data-value="3" aria-label="3 dollár">💲</button>
+                    <button type="button" class="dollar-star" data-value="4" aria-label="4 dollár">💲</button>
+                    <button type="button" class="dollar-star" data-value="5" aria-label="5 dollár">💲</button>
+                </div>
+                <p id="ratingStats" class="rating-stats"></p>
+            </div>
+
+            <p id="modal-desc"></p>
+            <p id="modal-stats" class="modal-stats"></p>
+            <a id="modal-website" class="site-btn" target="_blank" rel="noopener noreferrer" hidden>Weboldal megnyitása ↗</a>
+
             <div id="modal-details-container" class="details-container">
                 <p id="modal-details-text"></p>
             </div>
@@ -80,10 +125,10 @@
     <div id="filterModal" class="filter-modal">
         <div class="filter-content">
             <div class="filter-header">
-                <h3>Kategória szűrő</h3>
+                <h3>Szűrő</h3>
                 <span id="closeFilterBtn" class="close-filter-btn">&times;</span>
             </div>
-            <p class="filter-subtitle">Válassz egy kategóriát a szűkítéshez:</p>
+            <p class="filter-subtitle">Kategória:</p>
             <div class="filter-options" id="filterOptions">
                 <button class="filter-chip" data-category="tech">Technológia</button>
                 <button class="filter-chip" data-category="auto">Autóipar</button>
@@ -92,9 +137,85 @@
                 <button class="filter-chip" data-category="home">Otthon</button>
                 <button class="filter-chip" data-category="social">Közösségi Média</button>
             </div>
+            <p class="filter-subtitle">Kiemelések:</p>
+            <div class="filter-options">
+                <button class="filter-chip" data-special="popular">🔥 Legnépszerűbb</button>
+                <button class="filter-chip" data-special="new">🆕 Új cégek</button>
+                <button class="filter-chip" data-special="premium">👑 Prémium</button>
+            </div>
             <div class="filter-actions">
                 <button id="resetFilterBtn" class="reset-filter-btn">Minden mutatása (Reset)</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Regisztráció / Belépés -->
+    <div id="authModal" class="filter-modal auth-modal">
+        <div class="filter-content auth-content">
+            <div class="filter-header">
+                <h3 id="authTitle">Csatlakozz a Brand Univerzumhoz</h3>
+                <span id="closeAuthBtn" class="close-filter-btn">&times;</span>
+            </div>
+            <div class="auth-tabs" id="authTabs">
+                <button type="button" data-tab="register" class="active">Regisztráció</button>
+                <button type="button" data-tab="login">Belépés</button>
+            </div>
+
+            <form id="registerForm" novalidate>
+                <!-- Regisztrációs típus választó (4. pont) -->
+                <div class="field">
+                    <label>Regisztráció típusa *</label>
+                    <div class="reg-type-selector">
+                        <label class="radio-label"><input type="radio" name="regType" value="company" checked> Cég (logó feltöltés)</label>
+                        <label class="radio-label"><input type="radio" name="regType" value="guest"> Vendég (csak értékelés)</label>
+                    </div>
+                </div>
+
+                <div class="field" id="fieldNameWrap">
+                    <label for="regName">Név / Cégnév *</label>
+                    <input id="regName" type="text" maxlength="60" autocomplete="organization">
+                    <small class="err" data-for="regName"></small>
+                </div>
+                
+                <div class="field">
+                    <label for="regEmail">E-mail * <span class="hint">(a belépéshez)</span></label>
+                    <input id="regEmail" type="email" autocomplete="email">
+                    <small class="err" data-for="regEmail"></small>
+                </div>
+                
+                <div class="field">
+                    <label for="regPass">Jelszó * <span class="hint">(min. 6 karakter)</span></label>
+                    <input id="regPass" type="password" autocomplete="new-password">
+                    <small class="err" data-for="regPass"></small>
+                </div>
+
+                <div id="companyFieldsOnly">
+                    <div class="field"><label for="regLogo">Logó feltöltése *</label>
+                        <input id="regLogo" type="file" accept="image/*"><small class="err" data-for="regLogo"></small></div>
+                    <div class="preview-wrap" id="previewWrap" hidden>
+                        <p class="hint">Így fog megjelenni a kártyád:</p>
+                        <div class="card static" id="previewCard"></div>
+                    </div>
+                    <div class="field"><label for="regDesc">Rövid leírás * <span class="counter" id="descCount">0 / 300</span></label>
+                        <textarea id="regDesc" rows="3" maxlength="300"></textarea><small class="err" data-for="regDesc"></small></div>
+                    <div class="field"><label for="regCat">Kategória *</label>
+                        <select id="regCat"><option value="">Válassz kategóriát…</option></select><small class="err" data-for="regCat"></small></div>
+                    <div class="field"><label for="regSite">Weboldal link <span class="hint">(nem kötelező)</span></label>
+                        <input id="regSite" type="text" inputmode="url" placeholder="https://" autocomplete="url"><small class="err" data-for="regSite"></small></div>
+                </div>
+
+                <button class="btn-primary" type="submit">Regisztráció</button>
+            </form>
+
+            <form id="loginForm" novalidate hidden>
+                <div class="field"><label for="logEmail">E-mail</label>
+                    <input id="logEmail" type="email" autocomplete="email"></div>
+                <div class="field"><label for="logPass">Jelszó</label>
+                    <input id="logPass" type="password" autocomplete="current-password"><small class="err" data-for="logPass"></small></div>
+                <button class="btn-primary" type="submit">Belépés</button>
+            </form>
+
+            <div id="accountView" hidden></div>
         </div>
     </div>
 

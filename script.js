@@ -2,63 +2,80 @@ window.onload = () => {
     // ----------------------------------------------------------------
     // DOM ELEMEK
     // ----------------------------------------------------------------
-    const container = document.getElementById('scene-container');
-    const searchInput = document.getElementById('searchInput');
-    const modal = document.getElementById('modal');
+    const $ = (id) => document.getElementById(id);
+    const container = $('scene-container');
+    const searchInput = $('searchInput');
+    const modal = $('modal');
     const closeBtn = document.querySelector('.close-btn');
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const navLinks = document.getElementById('navLinks');
-    const mobileWarningModal = document.getElementById('mobileWarningModal');
-    const closeWarningBtn = document.getElementById('closeWarningBtn');
-    const clearSearchBtn = document.getElementById('clearSearchBtn');
-    
-    // Modal részletek
-    const readMoreBtn = document.getElementById('readMoreBtn');
-    const modalDetailsContainer = document.getElementById('modal-details-container');
-    const modalDetailsText = document.getElementById('modal-details-text');
-    const modalCategory = document.getElementById('modal-category');
+    const hamburgerBtn = $('hamburgerBtn');
+    const navLinks = $('navLinks');
+    const mobileWarningModal = $('mobileWarningModal');
+    const closeWarningBtn = $('closeWarningBtn');
+    const clearSearchBtn = $('clearSearchBtn');
 
-    // ÚJ: Szűrő elemek
-    const filterToggleBtn = document.getElementById('filterToggleBtn');
-    const filterModal = document.getElementById('filterModal');
-    const closeFilterBtn = document.getElementById('closeFilterBtn');
-    const resetFilterBtn = document.getElementById('resetFilterBtn');
-    const filterChips = document.querySelectorAll('.filter-chip');
+    // Modal részletek
+    const readMoreBtn = $('readMoreBtn');
+    const modalDetailsContainer = $('modal-details-container');
+    const modalDetailsText = $('modal-details-text');
+    const modalCategory = $('modal-category');
+    const modalBadges = $('modal-badges');
+    const modalStats = $('modal-stats');
+    const modalWebsite = $('modal-website');
+    const starContainer = $('starContainer');
+    const ratingPrompt = $('ratingPrompt');
+    const ratingStats = $('ratingStats');
+
+    // Szűrő
+    const filterToggleBtn = $('filterToggleBtn');
+    const filterModal = $('filterModal');
+    const closeFilterBtn = $('closeFilterBtn');
+    const resetFilterBtn = $('resetFilterBtn');
+    const categoryChips = document.querySelectorAll('.filter-chip[data-category]');
+    const specialChips = document.querySelectorAll('.filter-chip[data-special]');
+
+    // Felfedező sáv & Gyorsszűrők
+    const discoverBar = $('discoverBar');
+    const dList = $('discoverList');
+    const dTabs = document.querySelectorAll('.dtab'); // mind asztali és mobil fül
+    const randomBtn = $('randomBtn');
+    const mobileRandomBtn = $('mobileRandomBtn');
+    const resultInfo = $('resultInfo');
+    const toastEl = $('toast');
 
     const WARNING_SEEN_KEY = 'mobileWarningSeen';
-    
+
     // ----------------------------------------------------------------
     // KONFIGURÁCIÓ ÉS VÁLTOZÓK
     // ----------------------------------------------------------------
-    
     let draggedItem = null;
-    const dragDistanceThreshold = 5; 
+    const dragDistanceThreshold = 5;
     let dragStartX = 0, dragStartY = 0, dragOffsetX = 0, dragOffsetY = 0;
-    let topZIndex = 50; 
-    
-    const PADDING_PERCENTAGE_X = 2; 
+    let topZIndex = 50;
+
+    const PADDING_PERCENTAGE_X = 2;
     const PADDING_PERCENTAGE_Y = 2;
-    const DESKTOP_MAX_SPEED = 0.08; 
-    const MOBILE_BREAKPOINT = 768; 
-    const MOBILE_MAX_SPEED = 0.03; 
-    
+    const DESKTOP_MAX_SPEED = 0.08;
+    const MOBILE_BREAKPOINT = 768;
+    const MOBILE_MAX_SPEED = 0.03;
+    const DAY = 864e5;
+    const NEW_DAYS = 7;
+
     let maxSpeed = DESKTOP_MAX_SPEED;
-    let isMobileView = window.innerWidth <= MOBILE_BREAKPOINT; 
+    let isMobileView = window.innerWidth <= MOBILE_BREAKPOINT;
     let cardSize = 120;
-    const navHeight = 70; 
+    let premiumSize = 152;
+    let navHeight = 70;
     let cachedBounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
 
     // Keresés és Szűrés állapot
     let filterState = {
         searchTerm: '',
-        activeCategory: null // 'tech', 'food', stb. vagy null
+        tokens: [],
+        activeCategory: null, 
+        special: null         
     };
 
-    const CENTER_TARGET_DAMPING = 0.15; 
-    const CENTER_AREA_WIDTH = 600; 
-    const CENTER_AREA_HEIGHT = 400; 
-
-    // ADATOK: 'category' mező hozzáadva
+    // ADATOK
     const items = [
         { 
             id: 1, name: "Nike", img: "img/l1.png", category: "fashion",
@@ -371,126 +388,15 @@ window.onload = () => {
         { 
             id: 78, name: "Versace", img: "img/l78.png", category: "fashion",
             desc: "Olasz divatmárka, amely extravagáns stílusáról és ikonikus mintáiról ismert." 
-        },
-    /**
-        { id: 79, name: "MAC", img: "img/l79.png", category: "fashion", desc: "A MAC Cosmetics kanadai kozmetikai márka, amely professzionális sminktermékeiről és széles színválasztékáról ismert." },
-        { id: 80, name: "Tommy Hilfiger", img: "img/l80.png", category: "fashion", desc: "Amerikai divatmárka, amely klasszikus amerikai stílusú ruházatot, cipőket és kiegészítőket kínál." },
-        { id: 81, name: "Tissot", img: "img/l81.png", category: "fashion", desc: "Svájci óragyártó, amely megfizethető, precíziós időmérőiről és sportóráiról ismert." },
-        { id: 82, name: "Michael Kors", img: "img/l82.png", category: "fashion", desc: "Amerikai luxus divatmárka, amely táskákat, órákat, ruházatot és kiegészítőket kínál." },
-        { id: 83, name: "Emirates", img: "img/l83.png", category: "auto", desc: "Dubaji központú nemzetközi légitársaság, amely prémium szolgáltatásairól és globális hálózatáról híres." },
-        { id: 84, name: "Dolce & Gabbana", img: "img/l84.png", category: "fashion", desc: "Olasz luxus divatmárka, amely extravagáns stílusáról, haute couture kollekcióiról és ikonikus mintáiról ismert." },
-        { id: 85, name: "Calvin Klein", img: "img/l85.png", category: "fashion", desc: "Amerikai divatmárka, amely minimalista stílusú ruházatot, fehérneműt, parfümöket és kiegészítőket kínál." },
-        { id: 86, name: "Fressnapf", img: "img/l86.png", category: "home", desc: "Németországi állateledel- és felszereléslánc, amely Európa-szerte jelen van." },
-        { id: 87, name: "Chanel", img: "img/l87.png", category: "fashion", desc: "Francia luxus divatmárka, híres parfümjeiről, haute couture ruházatáról és kiegészítőiről." },
-        { id: 88, name: "Whirlpool", img: "img/l88.png", category: "home", desc: "Amerikai háztartási gépgyártó, amely mosógépeket, hűtőket és konyhai berendezéseket kínál." },
-        { id: 89, name: "DeLonghi", img: "img/l89.png", category: "home", desc: "Olasz háztartási gépgyártó, híres kávéfőzőiről és konyhai eszközeiről." },
-        { id: 90, name: "Marshall", img: "img/l90.png", category: "tech", desc: "Brit hangtechnikai márka, amely erősítőiről és fejhallgatóiról ismert." },
-        { id: 91, name: "Miele", img: "img/l91.png", category: "home", desc: "Német prémium háztartási gépgyártó, amely mosógépeket, sütőket és porszívókat kínál." },
-        { id: 92, name: "Lacoste", img: "img/l92.png", category: "fashion", desc: "Francia divatmárka, híres krokodilos logójáról és sportos eleganciájáról." },
-        { id: 93, name: "New Balance", img: "img/l93.png", category: "fashion", desc: "Amerikai sportszergyártó, amely cipőket és sportruházatot kínál." },
-        { id: 94, name: "Tamaris", img: "img/l94.png", category: "fashion", desc: "Német cipőmárka, amely női lábbelik széles választékát kínálja." },
-        { id: 95, name: "Ray-Ban", img: "img/l95.png", category: "fashion", desc: "Amerikai szemüvegmárka, ikonikus napszemüvegeiről ismert." },
-        { id: 96, name: "Adobe", img: "img/l96.png", category: "tech", desc: "Amerikai szoftvervállalat, híres Photoshop, Illustrator és Acrobat programjairól." },
-        { id: 97, name: "Levi's", img: "img/l97.png", category: "fashion", desc: "Amerikai divatmárka, híres farmernadrágjairól és klasszikus stílusáról." },
-        { id: 98, name: "Nintendo", img: "img/l98.png", category: "tech", desc: "Japán videojáték-gyártó, híres a Mario és Zelda sorozatokról." },
-        { id: 99, name: "Spotify", img: "img/l99.png", category: "social", desc: "Svéd streaming szolgáltató, amely zenék és podcastok széles választékát kínálja." },
-        { id: 100, name: "PayPal", img: "img/l100.png", category: "tech", desc: "Amerikai online fizetési szolgáltató, amely biztonságos tranzakciókat kínál világszerte." },
-        { id: 101, name: "DHL", img: "img/l101.png", category: "auto", desc: "Globális logisztikai vállalat, amely csomagszállítási és futárszolgáltatásokat kínál." },
-        { id: 102, name: "GLS", img: "img/l102.png", category: "auto", desc: "Európai logisztikai vállalat, amely csomagszállítási szolgáltatásokat nyújt." },
-        { id: 103, name: "UPS", img: "img/l103.png", category: "auto", desc: "Amerikai logisztikai vállalat, amely globális csomagszállítási szolgáltatásokat kínál." },
-        { id: 104, name: "Canon", img: "img/l104.png", category: "tech", desc: "Japán vállalat, amely fényképezőgépeket, nyomtatókat és optikai eszközöket gyárt." },
-        { id: 105, name: "HP", img: "img/l105.png", category: "tech", desc: "Amerikai informatikai vállalat, amely számítógépeket, nyomtatókat és kiegészítőket gyárt." },
-        { id: 106, name: "Allianz", img: "img/l106.png", category: "tech", desc: "Német biztosítótársaság, amely globális pénzügyi és biztosítási szolgáltatásokat kínál." },
-        { id: 107, name: "IBM", img: "img/l107.png", category: "tech", desc: "Amerikai informatikai vállalat, amely technológiai és tanácsadási szolgáltatásokat nyújt." },
-        { id: 108, name: "Douglas", img: "img/l108.png", category: "fashion", desc: "Német parfüm- és kozmetikai üzletlánc." },
-        { id: 109, name: "Müller", img: "img/l109.png", category: "home", desc: "Német drogéria- és szupermarketlánc, amely széles termékkínálattal rendelkezik." },
-        { id: 110, name: "DM", img: "img/l110.png", category: "home", desc: "Német drogérialánc, amely kozmetikai, háztartási és egészségügyi termékeket kínál." },
-        { id: 111, name: "Lego", img: "img/l111.png", category: "home", desc: "Dán játékgyártó, híres építőkockáiról és kreatív játékairól." },
-        { id: 112, name: "Lidl", img: "img/l112.png", category: "food", desc: "Német diszkont áruházlánc, amely élelmiszereket és háztartási cikkeket kínál." },
-        { id: 113, name: "3M", img: "img/l113.png", category: "tech", desc: "Amerikai multinacionális vállalat, amely innovatív ipari és fogyasztói termékeket gyárt." },
-        { id: 114, name: "Huawei", img: "img/l114.png", category: "tech", desc: "Kínai technológiai vállalat, amely okostelefonokat, hálózati berendezéseket és digitális megoldásokat kínál." },
-        { id: 115, name: "Sony", img: "img/l115.png", category: "tech", desc: "Japán multinacionális vállalat, amely elektronikai termékeket, szórakoztató tartalmakat és videojátékokat kínál." },
-        { id: 116, name: "LG", img: "img/l116.png", category: "tech", desc: "Dél-koreai elektronikai vállalat, amely háztartási gépeket, televíziókat és mobiltelefonokat gyárt." },
-        { id: 117, name: "Hisense", img: "img/l117.png", category: "tech", desc: "Kínai elektronikai vállalat, amely televíziókat, háztartási gépeket és mobiltelefonokat gyárt." },
-        { id: 118, name: "H&M", img: "img/l118.png", category: "fashion", desc: "Svéd divatmárka, amely megfizethető ruházatot és kiegészítőket kínál." },
-        { id: 119, name: "Pepsi", img: "img/l119.png", category: "food", desc: "Amerikai üdítőital-márka, a PepsiCo terméke." },
-        { id: 120, name: "KFC", img: "img/l120.png", category: "food", desc: "Amerikai gyorsétteremlánc, híres csirkés ételeiről." },
-        { id: 121, name: "Subway", img: "img/l121.png", category: "food", desc: "Amerikai gyorsétteremlánc, amely szendvicseket és salátákat kínál." },
-        { id: 122, name: "FedEx", img: "img/l122.png", category: "auto", desc: "Amerikai logisztikai vállalat, amely csomagszállítási és futárszolgáltatásokat kínál." },
-        { id: 123, name: "Santander", img: "img/l123.png", category: "tech", desc: "A Banco Santander spanyol multinacionális bankcsoport, amely Európa, Észak- és Dél-Amerika egyik legnagyobb pénzügyi szolgáltatója." },
-        { id: 124, name: "Kia", img: "img/l124.png", category: "auto", desc: "Dél-koreai autógyártó, amely megfizethető és megbízható járműveiről ismert." },
-        { id: 125, name: "eBay", img: "img/l125.png", category: "tech", desc: "Amerikai online piactér, ahol felhasználók termékeket vásárolhatnak és árverezhetnek." },
-        { id: 126, name: "Pampers", img: "img/l126.png", category: "home", desc: "A Procter & Gamble pelenkamárkája, amely világszerte ismert a babatermékek piacán." },
-        { id: 127, name: "Gillette", img: "img/l127.png", category: "fashion", desc: "Amerikai borotvamárka, híres férfi és női borotvatermékeiről." },
-        { id: 128, name: "Makita", img: "img/l128.png", category: "home", desc: "Japán szerszámgyártó, amely elektromos kéziszerszámokat és ipari berendezéseket kínál." },
-        { id: 129, name: "Hilti", img: "img/l129.png", category: "home", desc: "Liechtensteini szerszámgyártó, amely építőipari eszközöket és megoldásokat kínál." },
-        { id: 130, name: "Acer", img: "img/l130.png", category: "tech", desc: "Tajvani informatikai vállalat, amely laptopokat, monitorokat és számítástechnikai eszközöket gyárt." },
-        { id: 131, name: "Kenwood", img: "img/l131.png", category: "home", desc: "Brit elektronikai márka, híres konyhai robotgépeiről és audioeszközeiről." },
-        { id: 132, name: "Lay's", img: "img/l132.png", category: "food", desc: "Amerikai chipsmárka, a PepsiCo terméke." },
-        { id: 133, name: "Chio", img: "img/l133.png", category: "food", desc: "Német snackmárka, amely chips és ropogtatnivalók széles választékát kínálja." },
-        { id: 134, name: "Univer", img: "img/l134.png", category: "food", desc: "Magyar élelmiszergyártó, híres mustárjairól, szószairól és fűszereiről." },
-        { id: 135, name: "Harley Davidson", img: "img/l135.png", category: "auto", desc: "Amerikai motorkerékpár-gyártó, ikonikus chopper stílusú motorjairól ismert." },
-        { id: 136, name: "Brendon", img: "img/l136.png", category: "home", desc: "Magyar bababolt-hálózat, amely babatermékeket és kiegészítőket kínál." },
-        { id: 137, name: "Renault", img: "img/l137.png", category: "auto", desc: "Francia autógyártó, amely széles választékban kínál személyautókat és haszongépjárműveket." },
-        { id: 138, name: "Asus", img: "img/l138.png", category: "tech", desc: "Tajvani informatikai vállalat, amely laptopokat, alaplapokat és gamer eszközöket gyárt." },
-        { id: 139, name: "Lenovo", img: "img/l139.png", category: "tech", desc: "Kínai informatikai vállalat, amely laptopokat, PC-ket és okoseszközöket kínál." },
-        { id: 140, name: "MSI", img: "img/l140.png", category: "tech", desc: "Tajvani informatikai vállalat, amely gamer laptopokat, alaplapokat és grafikus kártyákat gyárt." },
-        { id: 141, name: "Yahoo", img: "img/l141.png", category: "tech", desc: "Amerikai internetes szolgáltató, híres keresőmotorjáról és e-mail szolgáltatásáról." },
-        { id: 142, name: "Meta", img: "img/l142.png", category: "tech", desc: "Amerikai technológiai vállalat, a Facebook, Instagram és WhatsApp tulajdonosa." },
-        { id: 143, name: "Sega", img: "img/l143.png", category: "tech", desc: "Japán videojáték-fejlesztő és kiadó, híres Sonic the Hedgehog sorozatáról." },
-        { id: 144, name: "Logitech", img: "img/l144.png", category: "tech", desc: "Svájci-amerikai vállalat, amely számítógépes perifériákat és gamer kiegészítőket gyárt." },
-        { id: 145, name: "WhatsApp", img: "img/l145.png", category: "social", desc: "Globális üzenetküldő alkalmazás, amely a Meta Platforms tulajdonában van." },
-        { id: 146, name: "Nikon", img: "img/l146.png", category: "tech", desc: "Japán optikai és fényképezőgép-gyártó vállalat." },
-        { id: 147, name: "Electrolux", img: "img/l147.png", category: "home", desc: "Svéd háztartási gépgyártó, amely hűtőket, mosógépeket és konyhai eszközöket kínál." },
-        { id: 148, name: "Dell", img: "img/l148.png", category: "tech", desc: "Amerikai informatikai vállalat, amely számítógépeket, laptopokat és szervereket gyárt." },
-        { id: 149, name: "Chevrolet", img: "img/l149.png", category: "auto", desc: "Amerikai autógyártó, a General Motors leányvállalata." },
-        { id: 150, name: "Pringles", img: "img/l150.png", category: "food", desc: "Amerikai chipsmárka, híres hengeres csomagolásáról." },
-        { id: 151, name: "Starbucks", img: "img/l151.png", category: "food", desc: "Amerikai kávéházlánc, világszerte ismert kávéitalairól." },
-        { id: 152, name: "Milka", img: "img/l152.png", category: "food", desc: "Svájci csokoládémárka, a Mondelez International terméke." },
-        { id: 153, name: "Kinder", img: "img/l153.png", category: "food", desc: "Olasz édességmárka, híres Kinder tojásairól és csokoládéiról." },
-        { id: 154, name: "Android", img: "img/l154.png", category: "tech", desc: "A Google által fejlesztett mobil operációs rendszer." },
-        { id: 155, name: "Dyson", img: "img/l155.png", category: "home", desc: "Brit technológiai vállalat, híres porszívóiról, hajszárítókról és légtisztítókról." },
-        { id: 156, name: "Playboy", img: "img/l156.png", category: "fashion", desc: "Amerikai életmód- és magazinmárka, híres nyuszis logójáról." },
-        { id: 157, name: "Knorr", img: "img/l157.png", category: "food", desc: "Német élelmiszermárka, amely levesporokat, fűszereket és szószokat kínál." },
-        { id: 158, name: "Nescafé", img: "img/l158.png", category: "food", desc: "A Nestlé instant kávémárkája, világszerte ismert." },
-        { id: 159, name: "Danone", img: "img/l159.png", category: "food", desc: "Francia élelmiszeripari vállalat, amely tejtermékeket, ásványvizet és bébiételeket gyárt." },
-        { id: 160, name: "Nivea", img: "img/l160.png", category: "fashion", desc: "Német kozmetikai márka, híres bőrápolási termékeiről." },
-        { id: 161, name: "GoPro", img: "img/l161.png", category: "tech", desc: "Amerikai akciókamera-gyártó, híres sportkameráiról." },
-        { id: 162, name: "Tezenis", img: "img/l162.png", category: "fashion", desc: "Olasz divatmárka, amely fehérneműt és ruházatot kínál." },
-        { id: 163, name: "John Deere", img: "img/l163.png", category: "auto", desc: "Amerikai mezőgazdasági gépgyártó, híres traktorairól és kombájnjairól." },
-        { id: 164, name: "Bose", img: "img/l164.png", category: "tech", desc: "Amerikai hangtechnikai vállalat, híres prémium hangszóróiról és fejhallgatóiról." },
-        { id: 165, name: "Tiffany & Co.", img: "img/l165.png", category: "fashion", desc: "Amerikai luxus ékszermárka, ikonikus kék dobozairól és gyémántékszereiről ismert." },
-        { id: 166, name: "Zeppelin", img: "img/l166.png", category: "fashion", desc: "Német óragyártó márka, amely klasszikus stílusú időmérőket kínál." },
-        { id: 167, name: "Helly Hansen", img: "img/l167.png", category: "fashion", desc: "Norvég ruházati márka, híres outdoor és munkaruházati termékeiről." },
-        { id: 168, name: "Jaguar", img: "img/l168.png", category: "auto", desc: "Brit prémium autógyártó, amely sportos és elegáns járműveiről ismert." },
-        { id: 169, name: "Casio", img: "img/l169.png", category: "tech", desc: "Japán elektronikai vállalat, híres óráiról, számológépeiről és zenei eszközeiről." },
-        { id: 170, name: "Pandora", img: "img/l170.png", category: "fashion", desc: "Dán ékszermárka, híres charm karkötőiről és személyre szabható ékszereiről." },
-        { id: 171, name: "Swarovski", img: "img/l171.png", category: "fashion", desc: "Osztrák luxusmárka, híres kristályékszereiről és dekorációs termékeiről." },
-        { id: 172, name: "Citizen", img: "img/l172.png", category: "fashion", desc: "Japán óragyártó, híres Eco-Drive technológiájáról." },
-        { id: 173, name: "Devergo", img: "img/l173.png", category: "fashion", desc: "Magyar divatmárka, amely fiatalos ruházatot és kiegészítőket kínál." },
-        { id: 174, name: "Geox", img: "img/l174.png", category: "fashion", desc: "Olasz cipőmárka, híres lélegző talpú lábbelijeiről." },
-        { id: 175, name: "DKNY", img: "img/l175.png", category: "fashion", desc: "Amerikai divatmárka, amely modern és városi stílusú ruházatot kínál." },
-        { id: 176, name: "Yves Saint Laurent", img: "img/l176.png", category: "fashion", desc: "Francia luxus divatmárka, híres haute couture ruházatáról és parfümjeiről." },
-        { id: 177, name: "Lamborghini", img: "img/l177.png", category: "auto", desc: "Olasz luxus sportautógyártó, híres ikonikus szupersportautóiról." },
-        { id: 178, name: "Iveco", img: "img/l178.png", category: "auto", desc: "Olasz haszongépjármű-gyártó, amely teherautókat és buszokat kínál." },
-        { id: 179, name: "Volvo", img: "img/l179.png", category: "auto", desc: "Svéd autógyártó, híres biztonságos és megbízható járműveiről." },
-        { id: 180, name: "MAN", img: "img/l180.png", category: "auto", desc: "Német haszongépjármű-gyártó, amely teherautókat és buszokat kínál." },
-        { id: 181, name: "Timberland", img: "img/l181.png", category: "fashion", desc: "Amerikai cipő- és ruházati márka, híres bakancsairól." },
-        { id: 182, name: "Hello Kitty", img: "img/l182.png", category: "home", desc: "Japán karakter és márka, a Sanrio tulajdona, világszerte népszerű." },
-        { id: 183, name: "Reddit", img: "img/l183.png", category: "social", desc: "Amerikai közösségi média platform, amely fórumokra épül." },
-        { id: 184, name: "Revolut", img: "img/l184.png", category: "tech", desc: "Brit fintech vállalat, amely digitális banki és pénzügyi szolgáltatásokat kínál." },
-        { id: 185, name: "Under Armour", img: "img/l185.png", category: "fashion", desc: "Amerikai sportszergyártó, híres innovatív sportruházatáról." },
-        { id: 186, name: "Cartoon Network", img: "img/l186.png", category: "social", desc: "Amerikai televíziós csatorna, híres animációs sorozatairól." },
-        { id: 187, name: "Vodafone", img: "img/l187.png", category: "tech", desc: "Brit telekommunikációs vállalat, amely mobil- és internetes szolgáltatásokat kínál." },
-        { id: 188, name: "Bugatti", img: "img/l188.png", category: "auto", desc: "Francia luxusautógyártó, híres exkluzív sportautóiról." },
-        { id: 189, name: "Twitch", img: "img/l189.png", category: "social", desc: "Amerikai streaming platform, amely videojáték-közvetítésekre és élő tartalmakra épül." },
-        { id: 190, name: "Monster", img: "img/l190.png", category: "food", desc: "Amerikai energiaital-márka, híres extrémsport szponzorációiról." },
-        { id: 191, name: "DreamWorks", img: "img/l191.png", category: "social", desc: "Amerikai filmstúdió, híres animációs és élőszereplős filmjeiről." },
-        { id: 192, name: "Warner Bros.", img: "img/l192.png", category: "social", desc: "Amerikai film- és televíziós stúdió, híres klasszikus és modern produkcióiról." }, 
-    **/
+        }
     ];
 
-    // Segéd: Kategória név megjelenítéshez
+    const META = {
+        premium: [3, 16, 20, 66, 76],                       
+        newDaysAgo: { 21: 0, 22: 1, 48: 2, 26: 4, 43: 6 }, 
+        baseOpens: { 3: 128, 19: 120, 16: 97, 1: 85, 2: 80, 54: 72, 40: 66, 76: 58, 20: 55, 5: 50, 14: 44, 36: 41 }
+    };
+
     const categoryNames = {
         tech: "Technológia",
         auto: "Autóipar",
@@ -500,130 +406,218 @@ window.onload = () => {
         social: "Közösségi Média"
     };
 
+    items.forEach(it => {
+        it.premium = META.premium.includes(it.id);
+        if (it.id in META.newDaysAgo) it.addedAt = Date.now() - META.newDaysAgo[it.id] * DAY;
+        it.baseOpens = META.baseOpens[it.id] || 0;
+    });
+
+    // TÁROLÁS
+    const LS = {
+        get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+        set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+    };
+    const companies = LS.get('bu_companies', []);
+    const opens = LS.get('bu_opens', {});
+    const ratings = LS.get('bu_ratings', {}); // itemId -> { totalScore, count, userRatings: { email: score } }
+
+    companies.forEach(c => items.push({
+        id: c.id, name: c.name, img: c.logo, category: c.category, desc: c.desc,
+        website: c.website, addedAt: c.addedAt, baseOpens: 0, premium: false, registered: true
+    }));
+
+    // SEGÉDEK
+    const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const isNew = (it) => !!it.addedAt && (Date.now() - it.addedAt) < NEW_DAYS * DAY;
+    const totalOpens = (it) => (it.baseOpens || 0) + (opens[it.id] || 0);
+    const topItems = (n) => [...items].sort((a, b) => totalOpens(b) - totalOpens(a)).slice(0, n);
+    const safeUrl = (u) => {
+        if (!u) return '';
+        try {
+            const x = new URL(/^[a-z][a-z0-9+.-]*:/i.test(u) ? u : 'https://' + u);
+            return /^https?:$/.test(x.protocol) ? x.href : '';
+        } catch (e) { return ''; }
+    };
+    const placeholder = (n) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70"><rect width="70" height="70" rx="14" fill="#383838"/><text x="35" y="46" font-size="32" text-anchor="middle" fill="#4fc3f7" font-family="sans-serif">${(String(n || '?').trim().charAt(0).toUpperCase()).replace(/[<>&"']/g, '?')}</text></svg>`);
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+    let toastTimer;
+    function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('active');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('active'), 5000);
+    }
+
+    // Élmény / Részecske hatás értékeléskor (3. pont)
+    function ratingParticleEffect(targetElement) {
+        const rect = targetElement.getBoundingClientRect();
+        const startX = rect.left + rect.width / 2;
+        const startY = rect.top + rect.height / 2;
+        const colors = ['#ffd54f', '#ffca28', '#ffe082', '#fff176', '#4fc3f7'];
+        
+        for (let i = 0; i < 7; i++) {
+            const p = el('div', 'rating-particle');
+            const angle = (Math.random() * Math.PI) - (Math.PI / 2); // felfelé irány
+            const distance = 40 + Math.random() * 60;
+            const dx = Math.cos(angle) * distance;
+            const dy = -Math.sin(angle) * distance - 20;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            p.style.cssText = `left:${startX}px; top:${startY}px; background:${color}; --dx:${dx}px; --dy:${dy}px;`;
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 1000);
+        }
+    }
+
+    function confetti() {
+        const colors = ['#4fc3f7', '#ffd54f', '#81c784', '#f06292', '#ba68c8'];
+        for (let i = 0; i < 40; i++) {
+            const p = el('i', 'confetti');
+            const a = Math.random() * Math.PI * 2, d = 120 + Math.random() * 260;
+            p.style.cssText = `left:50%;top:45%;background:${colors[i % 5]};--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d + 120}px;--rot:${Math.random() * 720}deg`;
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 1600);
+        }
+    }
+
+    // MOBIL ÁLLAPOT, MÉRETEK
+    const cardElements = [];
+
     function checkMobileState() {
         isMobileView = window.innerWidth <= MOBILE_BREAKPOINT;
         if (isMobileView) {
             maxSpeed = MOBILE_MAX_SPEED;
-            const seen = localStorage.getItem(WARNING_SEEN_KEY);
-            if (!seen) {
-                setTimeout(() => {
-                    mobileWarningModal.classList.add('active');
-                }, 1000); 
-            }
+            let seen = null;
+            try { seen = localStorage.getItem(WARNING_SEEN_KEY); } catch (e) { }
+            if (!seen) setTimeout(() => mobileWarningModal.classList.add('active'), 1000);
         } else {
             maxSpeed = DESKTOP_MAX_SPEED;
             mobileWarningModal.classList.remove('active');
         }
     }
-    
+
     closeWarningBtn.addEventListener('click', () => {
         mobileWarningModal.classList.remove('active');
-        localStorage.setItem(WARNING_SEEN_KEY, 'true');
+        try { localStorage.setItem(WARNING_SEEN_KEY, 'true'); } catch (e) { }
     });
 
     function updateBounds() {
         const w = window.innerWidth, h = window.innerHeight;
         cardSize = isMobileView ? 90 : 120;
+        premiumSize = Math.round(cardSize * 1.27);
+        navHeight = Math.round(discoverBar.getBoundingClientRect().bottom) || 70;
         cachedBounds.minX = (w * PADDING_PERCENTAGE_X / 100);
         cachedBounds.maxX = w - (w * PADDING_PERCENTAGE_X / 100) - cardSize;
         cachedBounds.minY = navHeight + (h * PADDING_PERCENTAGE_Y / 100);
         cachedBounds.maxY = h - (h * PADDING_PERCENTAGE_Y / 100) - cardSize;
+        cardElements.forEach(c => { c.size = c.originalData.premium ? premiumSize : cardSize; });
     }
-    
+    const limX = (c) => cachedBounds.maxX - (c.size - cardSize);
+    const limY = (c) => cachedBounds.maxY - (c.size - cardSize);
+
     function updateDimmedState() {
         const currentlyHovered = cardElements.some(c => c.isHovering);
         cardElements.forEach(item => {
-            if (currentlyHovered && !item.isHovering && !item.element.classList.contains('filtered-out')) {
-                item.element.classList.add('dimmed');
-            } else {
-                item.element.classList.remove('dimmed');
-            }
+            const skip = item.originalData.premium || item.element.classList.contains('filtered-out');
+            if (currentlyHovered && !item.isHovering && !skip) item.element.classList.add('dimmed');
+            else item.element.classList.remove('dimmed');
         });
     }
 
     function calculateCenteredGrid(cards) {
-        const containerW = window.innerWidth, containerH = window.innerHeight;
-        const centerX = containerW / 2;
-        const centerY = (containerH + navHeight) / 2; 
-        const gridW = Math.min(CENTER_AREA_WIDTH, containerW - 100); 
-        const gridH = Math.min(CENTER_AREA_HEIGHT, containerH - navHeight - 100);
-        const numCards = cards.length;
-        const cardDiameter = cardSize + 20; 
-        let cols = Math.floor(gridW / cardDiameter);
-        cols = Math.max(1, Math.min(cols, numCards)); 
-        const rows = Math.ceil(numCards / cols);
-        const usedW = cols * cardDiameter, usedH = rows * cardDiameter;
-        const startX = centerX - usedW / 2, startY = centerY - usedH / 2;
-
-        cards.forEach((card, index) => {
-            const col = index % cols, row = Math.floor(index / cols);
-            card.targetX = startX + col * cardDiameter + (cardDiameter - cardSize) / 2;
-            card.targetY = startY + row * cardDiameter + (cardDiameter - cardSize) / 2;
+        const W = window.innerWidth, H = window.innerHeight, gap = 12;
+        const maxSize = Math.max(...cards.map(c => c.size));
+        const cell = maxSize + gap;
+        const gridW = Math.min(W - 30, 900);
+        const cols = Math.max(1, Math.min(Math.floor(gridW / cell), cards.length));
+        const rows = Math.ceil(cards.length / cols);
+        const top = navHeight + 40, availH = H - top - 16;
+        const stepY = rows > 1 ? Math.max(40, Math.min(cell, (availH - maxSize) / (rows - 1))) : cell;
+        const usedW = cols * cell, usedH = (rows - 1) * stepY + maxSize;
+        const startX = (W - usedW) / 2, startY = top + Math.max(0, (availH - usedH) / 2);
+        cards.forEach((c, i) => {
+            const col = i % cols, row = Math.floor(i / cols);
+            c.targetX = startX + col * cell + (cell - c.size) / 2;
+            c.targetY = startY + row * stepY + (maxSize - c.size) / 2;
         });
     }
 
-    const cardElements = [];
-    checkMobileState(); 
-    updateBounds();
+    // KÁRTYÁK LÉTREHOZÁSA
+    function createCard(item, spawn) {
+        const card = el('div', 'card' + (item.premium ? ' premium' : ''));
+        const img = new Image();
+        img.src = item.img; img.alt = item.name;
+        img.onerror = () => { img.onerror = null; img.src = placeholder(item.name); };
+        card.append(img, el('h3', null, item.name));
+        if (item.premium) card.appendChild(el('span', 'badge-crown', '👑'));
+        if (isNew(item)) card.appendChild(el('span', 'badge-new', 'ÚJ'));
 
-    items.forEach(item => {
-        const card = document.createElement('div');
-        card.classList.add('card');
-        card.innerHTML = `<img src="${item.img}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/70?text=Logo'"><h3>${item.name}</h3>`;
-        
+        const size = item.premium ? premiumSize : cardSize;
         const data = {
-            element: card,
-            pixelX: cachedBounds.minX + Math.random() * (cachedBounds.maxX - cachedBounds.minX),
-            pixelY: cachedBounds.minY + Math.random() * (cachedBounds.maxY - cachedBounds.minY),
-            currentZ: Math.floor(Math.random() * 50),
+            element: card, size,
+            pixelX: cachedBounds.minX + Math.random() * (cachedBounds.maxX - size + cardSize - cachedBounds.minX),
+            pixelY: cachedBounds.minY + Math.random() * (cachedBounds.maxY - size + cardSize - cachedBounds.minY),
+            currentZ: item.premium ? 40 + Math.floor(Math.random() * 10) : Math.floor(Math.random() * 40),
             vx: ((Math.random() - 0.5) * maxSpeed * 2),
             vy: ((Math.random() - 0.5) * maxSpeed * 2),
-            name: item.name.toLowerCase(),
+            name: norm(item.name),
+            hay: norm(item.name + ' ' + (item.desc || '') + ' ' + (categoryNames[item.category] || '')),
             originalData: item,
             isDragging: false, canClick: true, isHovering: false,
-            targetX: undefined, targetY: undefined
+            targetX: undefined, targetY: undefined,
+            spawnT: spawn ? 0 : 1
         };
+        if (spawn) {
+            data.pixelX = window.innerWidth / 2 - size / 2;
+            data.pixelY = (window.innerHeight + navHeight) / 2 - size / 2;
+            data.currentZ = ++topZIndex;
+            card.classList.add('highlight');
+            setTimeout(() => card.classList.remove('highlight'), 7000);
+        }
 
-        card.addEventListener('mouseenter', () => { if (!isMobileView) { data.isHovering = true; updateDimmedState(); }});
-        card.addEventListener('mouseleave', () => { if (!isMobileView) { data.isHovering = false; updateDimmedState(); }});
-        
+        card.addEventListener('mouseenter', () => { if (!isMobileView) { data.isHovering = true; updateDimmedState(); } });
+        card.addEventListener('mouseleave', () => { if (!isMobileView) { data.isHovering = false; updateDimmedState(); } });
+
         const startHandler = (e) => {
-            if (data.element.classList.contains('filtered-out') || data.element.classList.contains('dimmed')) return;
-            e.preventDefault(); 
+            if (card.classList.contains('filtered-out') || card.classList.contains('dimmed')) return;
+            e.preventDefault();
             draggedItem = data;
-
             topZIndex++;
             draggedItem.currentZ = topZIndex;
-
-            draggedItem.isDragging = false; 
-            draggedItem.canClick = true; 
+            draggedItem.isDragging = false;
+            draggedItem.canClick = true;
             const client = e.type.startsWith('touch') ? e.touches[0] : e;
             dragStartX = client.clientX; dragStartY = client.clientY;
-            const cardRect = draggedItem.element.getBoundingClientRect();
-            dragOffsetX = client.clientX - cardRect.left; 
-            dragOffsetY = client.clientY - cardRect.top;
+            const r = card.getBoundingClientRect();
+            dragOffsetX = client.clientX - r.left;
+            dragOffsetY = client.clientY - r.top;
         };
-        
         card.addEventListener('mousedown', startHandler);
-        card.addEventListener('touchstart', startHandler, { passive: false }); 
+        card.addEventListener('touchstart', startHandler, { passive: false });
         cardElements.push(data);
         container.appendChild(card);
-    });
+        return data;
+    }
+
+    checkMobileState();
+    updateBounds();
+    items.forEach(item => createCard(item, false));
 
     function handleMove(e) {
         if (!draggedItem) return;
         const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX;
         const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
-        
         if (!draggedItem.isDragging) {
             if (Math.abs(clientX - dragStartX) > dragDistanceThreshold || Math.abs(clientY - dragStartY) > dragDistanceThreshold) {
-                draggedItem.isDragging = true; draggedItem.canClick = false; 
+                draggedItem.isDragging = true; draggedItem.canClick = false;
                 draggedItem.element.classList.add('dragging');
             }
         }
         if (draggedItem.isDragging) {
-            draggedItem.pixelX = Math.max(cachedBounds.minX, Math.min(cachedBounds.maxX, clientX - dragOffsetX));
-            draggedItem.pixelY = Math.max(cachedBounds.minY, Math.min(cachedBounds.maxY, clientY - dragOffsetY));
+            draggedItem.pixelX = Math.max(cachedBounds.minX, Math.min(limX(draggedItem), clientX - dragOffsetX));
+            draggedItem.pixelY = Math.max(cachedBounds.minY, Math.min(limY(draggedItem), clientY - dragOffsetY));
         }
     }
 
@@ -632,40 +626,42 @@ window.onload = () => {
         if (draggedItem.canClick && !draggedItem.isDragging) openModal(draggedItem.originalData);
         if (draggedItem.isDragging) {
             draggedItem.element.classList.remove('dragging');
-            draggedItem.vx = (Math.random() - 0.5) * maxSpeed; 
-            draggedItem.vy = (Math.random() - 0.5) * maxSpeed; 
+            draggedItem.vx = (Math.random() - 0.5) * maxSpeed;
+            draggedItem.vy = (Math.random() - 0.5) * maxSpeed;
         }
         draggedItem = null;
     }
 
     document.addEventListener('mousemove', handleMove);
-    document.addEventListener('touchmove', handleMove, { passive: false }); 
+    document.addEventListener('touchmove', handleMove, { passive: false });
     document.addEventListener('mouseup', handleEnd);
     document.addEventListener('touchend', handleEnd);
 
+    const easeOutBack = (t) => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2);
+
     function animate() {
-        // Ha van aktív keresés VAGY aktív kategória szűrő, akkor középre rendezünk
-        const isFiltering = filterState.searchTerm.length > 0 || filterState.activeCategory !== null;
+        const isFiltering = filterState.tokens.length > 0 || filterState.activeCategory !== null || filterState.special !== null;
 
         cardElements.forEach(item => {
+            const hidden = item.element.classList.contains('filtered-out');
             if (isFiltering && item.targetX !== undefined) {
-                // Mozgás a rács pozícióba
-                item.pixelX += (item.targetX - item.pixelX) * CENTER_TARGET_DAMPING;
-                item.pixelY += (item.targetY - item.pixelY) * CENTER_TARGET_DAMPING;
+                item.pixelX += (item.targetX - item.pixelX) * 0.15;
+                item.pixelY += (item.targetY - item.pixelY) * 0.15;
                 item.vx = 0; item.vy = 0;
-            } else if (!item.element.classList.contains('filtered-out') && !item.isDragging) {
-                // Szabad mozgás
-                let nextX = item.pixelX + item.vx;
-                let nextY = item.pixelY + item.vy;
-                if (nextX < cachedBounds.minX || nextX > cachedBounds.maxX) item.vx *= -1;
-                if (nextY < cachedBounds.minY || nextY > cachedBounds.maxY) item.vy *= -1;
-                item.pixelX = Math.max(cachedBounds.minX, Math.min(cachedBounds.maxX, nextX));
-                item.pixelY = Math.max(cachedBounds.minY, Math.min(cachedBounds.maxY, nextY));
+            } else if (!hidden && !item.isDragging) {
+                const mx = limX(item), my = limY(item);
+                let nextX = item.pixelX + item.vx, nextY = item.pixelY + item.vy;
+                if (nextX < cachedBounds.minX || nextX > mx) item.vx *= -1;
+                if (nextY < cachedBounds.minY || nextY > my) item.vy *= -1;
+                item.pixelX = Math.max(cachedBounds.minX, Math.min(mx, nextX));
+                item.pixelY = Math.max(cachedBounds.minY, Math.min(my, nextY));
             }
-            
-            const isHidden = item.element.classList.contains('filtered-out');
-            const scale = isHidden ? 0 : 1; 
 
+            let scale = hidden ? 0 : 1;
+            if (item.spawnT < 1) {
+                item.spawnT = Math.min(1, item.spawnT + 0.03);
+                if (!hidden) scale = easeOutBack(item.spawnT);
+            }
             item.element.style.zIndex = item.currentZ;
             item.element.style.transform = `translate3d(${item.pixelX}px, ${item.pixelY}px, 0px) scale(${scale})`;
         });
@@ -673,170 +669,470 @@ window.onload = () => {
     }
     animate();
 
-    // ----------------------------------------------------------------
-    // KERESÉS ÉS SZŰRÉS LOGIKA (AND KAPCSOLAT)
-    // ----------------------------------------------------------------
-
+    // KERESÉS ÉS SZŰRÉS (1. pont: szűrés törlése után újraindulnak)
     function filterItems() {
-        const term = filterState.searchTerm;
-        const cat = filterState.activeCategory;
-        const matchingCards = [];
+        const { tokens, activeCategory: cat, special } = filterState;
+        const isAnyFilterActive = tokens.length > 0 || cat !== null || special !== null;
+        const topIds = new Set(topItems(10).map(i => i.id));
+        const matching = [];
 
-        // Gombok láthatósága
-        clearSearchBtn.style.display = term.length > 0 ? 'block' : 'none';
-        
-        // Főikon állapota
-        if (cat !== null) {
-            filterToggleBtn.classList.add('active');
-        } else {
-            filterToggleBtn.classList.remove('active');
-        }
-
-        let isAnyFilterActive = term.length > 0 || cat !== null;
+        clearSearchBtn.style.display = searchInput.value.length > 0 ? 'block' : 'none';
+        filterToggleBtn.classList.toggle('active', cat !== null || special !== null);
 
         cardElements.forEach(item => {
-            // 1. Keresés egyezés
-            const matchSearch = item.name.includes(term);
-            // 2. Kategória egyezés (ha nincs kat, akkor true)
-            const matchCat = cat === null || item.originalData.category === cat;
-
-            if (matchSearch && matchCat) {
+            const o = item.originalData;
+            const ok = tokens.every(t => item.hay.includes(t))
+                && (cat === null || o.category === cat)
+                && (special !== 'new' || isNew(o))
+                && (special !== 'premium' || o.premium)
+                && (special !== 'popular' || topIds.has(o.id));
+            item.element.classList.remove('premium-bg');
+            if (ok) {
                 item.element.classList.remove('filtered-out');
-                matchingCards.push(item);
+                matching.push(item);
             } else {
-                item.element.classList.add('filtered-out');
-                // Ha kiszűrtük, töröljük a célpontot
-                item.targetX = undefined; 
-                item.targetY = undefined;
+                item.targetX = undefined; item.targetY = undefined;
+                if (o.premium && isAnyFilterActive) {
+                    item.element.classList.remove('filtered-out');
+                    item.element.classList.add('premium-bg');
+                } else item.element.classList.add('filtered-out');
             }
         });
 
-        // Ha van aktív szűrés, számoljuk újra a rácsot a látható elemeknek
-        if (isAnyFilterActive && matchingCards.length > 0) {
-            calculateCenteredGrid(matchingCards);
+        if (isAnyFilterActive && matching.length > 0) {
+            matching.sort((a, b) => (b.originalData.premium ? 1 : 0) - (a.originalData.premium ? 1 : 0));
+            calculateCenteredGrid(matching);
         } else if (!isAnyFilterActive) {
-            // Minden szűrő törölve -> mindenki szabadon úszik
-            cardElements.forEach(item => {
-                item.targetX = undefined; item.targetY = undefined;
+            // Ha nincsen aktív szűrés, a célpozíciók törlődnek, így a kártyák újra útnak indulnak
+            cardElements.forEach(i => { 
+                i.targetX = undefined; 
+                i.targetY = undefined;
+                // Adjunk nekik új sebességet is, hogy biztosan elinduljanak
+                i.vx = ((Math.random() - 0.5) * maxSpeed * 2);
+                i.vy = ((Math.random() - 0.5) * maxSpeed * 2);
             });
         }
 
+        resultInfo.classList.toggle('active', isAnyFilterActive);
+        resultInfo.textContent = matching.length ? `${matching.length} találat` : 'Nincs találat – próbálj más kulcsszót';
         updateDimmedState();
     }
 
-    // Kereső Input Esemény
     searchInput.addEventListener('input', (e) => {
-        filterState.searchTerm = e.target.value.toLowerCase().trim();
+        const n = norm(e.target.value).trim();
+        filterState.searchTerm = n;
+        filterState.tokens = n.split(/\s+/).filter(Boolean);
         filterItems();
     });
-    
-    // Keresés törlése gomb
     clearSearchBtn.addEventListener('click', () => {
         searchInput.value = '';
         searchInput.dispatchEvent(new Event('input'));
     });
 
-    // ----------------------------------------------------------------
-    // SZŰRŐ MODAL KEZELÉS
-    // ----------------------------------------------------------------
+    const openFilter = () => { filterModal.classList.add('active'); };
+    const closeFilter = () => { filterModal.classList.remove('active'); };
+    filterToggleBtn.addEventListener('click', openFilter);
+    closeFilterBtn.addEventListener('click', closeFilter);
+    filterModal.addEventListener('click', (e) => { if (e.target === filterModal) closeFilter(); });
 
-    // Megnyitás
-    filterToggleBtn.addEventListener('click', () => {
-        filterModal.classList.add('active');
-    });
-
-    // Bezárás (X gomb)
-    closeFilterBtn.addEventListener('click', () => {
-        filterModal.classList.remove('active');
-    });
-
-    // Bezárás (Háttér kattintás)
-    filterModal.addEventListener('click', (e) => {
-        if (e.target === filterModal) filterModal.classList.remove('active');
-    });
-
-    // Kategória Chip kattintás
-    filterChips.forEach(chip => {
-        chip.addEventListener('click', () => {
-            const selectedCat = chip.dataset.category;
-
-            // Ha már ez volt aktív, akkor kikapcsoljuk (toggle)
-            if (filterState.activeCategory === selectedCat) {
-                filterState.activeCategory = null;
-                chip.classList.remove('active');
-            } else {
-                // Új kategória beállítása
-                filterState.activeCategory = selectedCat;
-                // UI frissítés
-                filterChips.forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-            }
-            
-            // Szűrés futtatása
+    function bindChips(chips, key, attr) {
+        chips.forEach(chip => chip.addEventListener('click', () => {
+            const val = chip.dataset[attr];
+            if (filterState[key] === val) { filterState[key] = null; chip.classList.remove('active'); }
+            else { filterState[key] = val; chips.forEach(c => c.classList.remove('active')); chip.classList.add('active'); }
             filterItems();
-        });
-    });
+        }));
+    }
+    bindChips(categoryChips, 'activeCategory', 'category');
+    bindChips(specialChips, 'special', 'special');
 
-    // Reset Filter Gomb
-    resetFilterBtn.addEventListener('click', () => {
-        filterState.activeCategory = null;
-        filterChips.forEach(c => c.classList.remove('active'));
+    function resetAll(closeIt) {
+        filterState.activeCategory = null; filterState.special = null;
+        searchInput.value = ''; filterState.searchTerm = ''; filterState.tokens = [];
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
         filterItems();
-        filterModal.classList.remove('active'); // Opcionális: bezárja a modalt reset után
-    });
+        if (closeIt) closeFilter();
+    }
+    resetFilterBtn.addEventListener('click', () => resetAll(true));
 
+    // FELFEDEZŐ SÁV & GYORSZSŰRŐK (2. és 6. pont)
+    let activeTab = 'popular';
+    function renderDiscover() {
+        let list = [];
+        if (activeTab === 'popular') list = topItems(10);
+        else if (activeTab === 'new') list = items.filter(isNew).sort((a, b) => b.addedAt - a.addedAt);
+        else list = items.filter(i => i.premium);
 
-    // ----------------------------------------------------------------
-    // RÉSZLETES MODAL
-    // ----------------------------------------------------------------
+        dList.replaceChildren();
+        if (!list.length) dList.appendChild(el('span', 'dempty', 'Még nincs ilyen cég'));
+        list.forEach((it, i) => {
+            const b = el('button', 'mini' + (it.premium ? ' is-premium' : ''));
+            b.type = 'button';
+            const im = new Image(); im.src = it.img; im.alt = '';
+            im.onerror = () => { im.onerror = null; im.src = placeholder(it.name); };
+            b.append(im, el('span', null, it.name));
+            if (activeTab === 'popular') b.prepend(el('em', 'rank', '#' + (i + 1)));
+            if (isNew(it)) b.appendChild(el('b', 'mini-new', 'ÚJ'));
+            b.addEventListener('click', () => openModal(it));
+            dList.appendChild(b);
+        });
+    }
 
+    // Gyorsgomb szűrés logika (2. pont)
+    function applyQuickFilter(tabName) {
+        activeTab = tabName;
+        dTabs.forEach(x => x.classList.toggle('active', x.dataset.tab === tabName));
+        renderDiscover();
+        
+        // Gyorsszűrő élesítése a kártyákra is:
+        if (tabName === 'popular') filterState.special = 'popular';
+        else if (tabName === 'new') filterState.special = 'new';
+        else if (tabName === 'premium') filterState.special = 'premium';
+        filterItems();
+
+        // Ha mobilon vagyunk, zárjuk be a menüt a kiválasztás után
+        if (isMobileView) {
+            navLinks.classList.remove('active');
+            hamburgerBtn.classList.remove('active');
+            container.style.pointerEvents = 'all';
+        }
+    }
+
+    dTabs.forEach(t => t.addEventListener('click', () => {
+        applyQuickFilter(t.dataset.tab);
+    }));
+
+    // Kártyák újrakeverése (6. pont)
+    function shuffleCards() {
+        cardElements.forEach(item => {
+            if (!item.element.classList.contains('filtered-out')) {
+                item.pixelX = cachedBounds.minX + Math.random() * (cachedBounds.maxX - item.size + cardSize - cachedBounds.minX);
+                item.pixelY = cachedBounds.minY + Math.random() * (cachedBounds.maxY - item.size + cardSize - cachedBounds.minY);
+                item.vx = ((Math.random() - 0.5) * maxSpeed * 2);
+                item.vy = ((Math.random() - 0.5) * maxSpeed * 2);
+            }
+        });
+        showToast('🔀 Kártyák újrakeverve!');
+        if (isMobileView) {
+            navLinks.classList.remove('active');
+            hamburgerBtn.classList.remove('active');
+            container.style.pointerEvents = 'all';
+        }
+    }
+    randomBtn.addEventListener('click', shuffleCards);
+    mobileRandomBtn.addEventListener('click', shuffleCards);
+
+    renderDiscover();
+
+    // RÉSZLETES MODAL & ÉRTÉKELÉSI RENDSZER (3. pont)
     function openModal(item) {
-        document.getElementById('modal-img').src = item.img; 
-        document.getElementById('modal-title').innerText = item.name;
-        document.getElementById('modal-desc').innerText = item.desc;
-        
-        // Kategória kiírása szépen
-        modalCategory.innerText = categoryNames[item.category] || item.category;
+        opens[item.id] = (opens[item.id] || 0) + 1;
+        LS.set('bu_opens', opens);
 
+        const mi = $('modal-img');
+        mi.onerror = () => { mi.onerror = null; mi.src = placeholder(item.name); };
+        mi.src = item.img;
+        $('modal-title').innerText = item.name;
+        $('modal-desc').innerText = item.desc;
+        modalCategory.innerText = categoryNames[item.category] || item.category;
         modalDetailsText.innerText = item.details || "Részletes leírás hamarosan...";
-        
+
+        modalBadges.replaceChildren();
+        if (item.premium) modalBadges.appendChild(el('span', 'mbadge gold', '👑 Prémium'));
+        if (isNew(item)) modalBadges.appendChild(el('span', 'mbadge green', '🆕 Új cég'));
+        const rank = topItems(5).findIndex(i => i.id === item.id);
+        if (rank > -1) modalBadges.appendChild(el('span', 'mbadge fire', '🔥 Top ' + (rank + 1)));
+        modalStats.textContent = '👁 ' + totalOpens(item) + ' megnyitás';
+
+        // Értékelési widget frissítése
+        updateRatingUI(item);
+
+        const url = safeUrl(item.website);
+        modalWebsite.hidden = !url;
+        if (url) modalWebsite.href = url;
+
         modalDetailsContainer.classList.remove('show');
         readMoreBtn.innerText = "Tovább olvasok";
-        
         modal.classList.add('active');
         container.style.pointerEvents = 'none';
+        renderDiscover();
+    }
+
+    function updateRatingUI(item) {
+        const session = getSession();
+        const itemRating = ratings[item.id] || { totalScore: 0, count: 0, userRatings: {} };
+        const avg = itemRating.count > 0 ? (itemRating.totalScore / itemRating.count).toFixed(1) : 'Még nincs értékelés';
+        
+        ratingStats.textContent = itemRating.count > 0 ? `Átlag: ${avg} / 5 (${itemRating.count} értékelés)` : 'Legyél te az első, aki értékeli!';
+        
+        const stars = starContainer.querySelectorAll('.dollar-star');
+        const userScore = session ? (itemRating.userRatings[session] || 0) : 0;
+
+        stars.forEach(star => {
+            const val = parseInt(star.dataset.value);
+            if (val <= userScore) star.classList.add('active');
+            else star.classList.remove('active');
+
+            // Eseménykezelő az értékeléshez
+            star.onclick = () => {
+                if (!session) {
+                    showToast('⚠️ Az értékeléshez előbb be kell jelentkezned!');
+                    return;
+                }
+                // Értékelés mentése
+                const oldScore = itemRating.userRatings[session] || 0;
+                if (oldScore === 0) {
+                    itemRating.count++;
+                    itemRating.totalScore += val;
+                } else {
+                    itemRating.totalScore += (val - oldScore);
+                }
+                itemRating.userRatings[session] = val;
+                ratings[item.id] = itemRating;
+                LS.set('bu_ratings', ratings);
+
+                updateRatingUI(item);
+                ratingParticleEffect(star);
+                showToast(`🌟 Köszönjük az értékelést (${val} / 5)!`);
+            };
+        });
+
+        if (!session) {
+            ratingPrompt.textContent = 'Jelentkezz be a logó értékeléséhez (1-5 dollár csillag):';
+        } else {
+            ratingPrompt.textContent = userScore > 0 ? 'Már értékelted ezt a logót (kattintással módosíthatod):' : 'Értékeld a logót (1-5 skálán):';
+        }
     }
 
     readMoreBtn.addEventListener('click', () => {
-        const isShowing = modalDetailsContainer.classList.contains('show');
-        if (isShowing) {
-            modalDetailsContainer.classList.remove('show');
-            readMoreBtn.innerText = "Tovább olvasok";
-        } else {
-            modalDetailsContainer.classList.add('show');
-            readMoreBtn.innerText = "Kevesebb";
-        }
+        const showing = modalDetailsContainer.classList.toggle('show');
+        readMoreBtn.innerText = showing ? "Kevesebb" : "Tovább olvasok";
     });
 
     function closeModal() {
         modal.classList.remove('active');
         container.style.pointerEvents = 'all';
     }
-
     closeBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-    
+
     hamburgerBtn.addEventListener('click', () => {
         hamburgerBtn.classList.toggle('active');
         navLinks.classList.toggle('active');
         container.style.pointerEvents = navLinks.classList.contains('active') ? 'none' : 'all';
     });
 
+    // REGISZTRÁCIÓ / BELÉPÉS (4. pont: Cég vagy Vendég választás)
+    const authModal = $('authModal'), authBtn = $('authBtn'), authLabel =$('authLabel');
+    const authTabs = $('authTabs'), authTitle =$('authTitle');
+    const registerForm = $('registerForm'), loginForm = $('loginForm'), accountView =$('accountView');
+    const regLogo = $('regLogo'), regDesc =$('regDesc'), regName = $('regName'), regCat =$('regCat');
+    const descCount = $('descCount'), previewWrap = $('previewWrap'), previewCard =$('previewCard');
+    const companyFieldsOnly = $('companyFieldsOnly');
+    const regTypeRadios = document.querySelectorAll('input[name="regType"]');
+    let pendingLogo = null;
+
+    Object.entries(categoryNames).forEach(([k, v]) => {
+        const o = el('option', null, v); o.value = k; regCat.appendChild(o);
+    });
+
+    // Regisztrációs típus váltás kezelése (4. pont)
+    regTypeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const isCompany = e.target.value === 'company';
+            companyFieldsOnly.style.display = isCompany ? 'block' : 'none';
+        });
+    });
+
+    const hash = async (s) => {
+        try {
+            const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('bu:' + s));
+            return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+        } catch (e) { return btoa(unescape(encodeURIComponent('bu:' + s))); }
+    };
+    const getSession = () => LS.get('bu_session', null);
+    const currentCompany = () => companies.find(c => c.email === getSession()) || null;
+
+    function updateAuthUI() {
+        const c = currentCompany();
+        authLabel.textContent = c ? c.name : 'Belépés';
+        authBtn.classList.toggle('logged', !!c);
+    }
+
+    function setErr(form, name, msg) {
+        const e = form.querySelector(`[data-for="${name}"]`);
+        if (e) e.textContent = msg || '';
+        return !msg;
+    }
+
+    function showView(v) {
+        registerForm.hidden = v !== 'register';
+        loginForm.hidden = v !== 'login';
+        accountView.hidden = v !== 'account';
+        authTabs.hidden = v === 'account';
+        authTabs.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.tab === v));
+        authTitle.textContent = v === 'account' ? 'Fiókom' : (v === 'login' ? 'Üdv újra!' : 'Csatlakozz a Brand Univerzumhoz');
+        if (v === 'account') renderAccount();
+    }
+    function openAuth(v) {
+        authModal.classList.add('active');
+        container.style.pointerEvents = 'none';
+        showView(v || (currentCompany() ? 'account' : 'register'));
+    }
+    function closeAuth() {
+        authModal.classList.remove('active');
+        container.style.pointerEvents = 'all';
+    }
+    authBtn.addEventListener('click', () => {
+        navLinks.classList.remove('active'); hamburgerBtn.classList.remove('active');
+        openAuth();
+    });
+    $('closeAuthBtn').addEventListener('click', closeAuth);
+    authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuth(); });
+    authTabs.querySelectorAll('button').forEach(b => b.addEventListener('click', () => showView(b.dataset.tab)));
+
+    function renderPreview() {
+        if (!pendingLogo) { previewWrap.hidden = true; return; }
+        previewWrap.hidden = false;
+        previewCard.replaceChildren();
+        const im = new Image(); im.src = pendingLogo; im.alt = '';
+        previewCard.append(im, el('h3', null, regName.value.trim() || 'Cégneved'), el('span', 'badge-new', 'ÚJ'));
+    }
+    regName.addEventListener('input', renderPreview);
+    regDesc.addEventListener('input', () => { descCount.textContent = regDesc.value.length + ' / 300'; });
+
+    regLogo.addEventListener('change', () => {
+        const f = regLogo.files[0];
+        pendingLogo = null;
+        if (!f) { setErr(registerForm, 'regLogo', ''); renderPreview(); return; }
+        if (!f.type.startsWith('image/')) { setErr(registerForm, 'regLogo', 'Csak képfájl tölthető fel.'); renderPreview(); return; }
+        if (f.size > 5 * 1024 * 1024) { setErr(registerForm, 'regLogo', 'Maximum 5 MB méretű kép tölthető fel.'); renderPreview(); return; }
+        const url = URL.createObjectURL(f), img = new Image();
+        img.onload = () => {
+            const S = 256, cv = document.createElement('canvas');
+            cv.width = cv.height = S;
+            const r = Math.min(S / img.width, S / img.height), w = img.width * r, h = img.height * r;
+            cv.getContext('2d').drawImage(img, (S - w) / 2, (S - h) / 2, w, h);
+            pendingLogo = cv.toDataURL('image/png');
+            URL.revokeObjectURL(url);
+            setErr(registerForm, 'regLogo', '');
+            renderPreview();
+        };
+        img.onerror = () => { setErr(registerForm, 'regLogo', 'A kép nem olvasható be.'); URL.revokeObjectURL(url); };
+        img.src = url;
+    });
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const f = registerForm;
+        const regType = document.querySelector('input[name="regType"]:checked').value;
+        const name = regName.value.trim(), email = $('regEmail').value.trim().toLowerCase();
+        const pass = $('regPass').value;
+        let ok = true;
+
+        ok = setErr(f, 'regName', name.length < 2 ? 'A név kötelező (min. 2 karakter).' : '') && ok;
+        ok = setErr(f, 'regEmail', /^\S+@\S+\.\S+$/.test(email) ? (companies.some(c => c.email === email) ? 'Ezzel az e-mail címmel már regisztráltak.' : '') : 'Adj meg érvényes e-mail címet.') && ok;
+        ok = setErr(f, 'regPass', pass.length < 6 ? 'Min. 6 karakter.' : '') && ok;
+
+        let company = null;
+        let item = null;
+
+        if (regType === 'company') {
+            const desc = regDesc.value.trim(), cat = regCat.value;
+            const siteRaw = $('regSite').value.trim(), site = safeUrl(siteRaw);
+
+            ok = setErr(f, 'regName', name.length < 2 ? 'A cégnév kötelező (min. 2 karakter).' :
+                (items.some(i => norm(i.name) === norm(name)) ? 'Ez a cégnév már szerepel.' : '')) && ok;
+            ok = setErr(f, 'regLogo', pendingLogo ? '' : 'A logó feltöltése kötelező.') && ok;
+            ok = setErr(f, 'regDesc', desc.length === 0 ? 'A rövid leírás kötelező.' : (desc.length > 300 ? 'Maximum 300 karakter.' : '')) && ok;
+            ok = setErr(f, 'regCat', cat ? '' : 'Válassz kategóriát.') && ok;
+            ok = setErr(f, 'regSite', siteRaw && !site ? 'Érvénytelen weboldal link.' : '') && ok;
+            if (!ok) return;
+
+            company = { id: Date.now(), name, email, pass: await hash(pass), logo: pendingLogo, desc, category: cat, website: site, addedAt: Date.now(), type: 'company' };
+            companies.push(company);
+            if (!LS.set('bu_companies', companies)) {
+                companies.pop();
+                setErr(f, 'regLogo', 'Nem sikerült menteni (a böngésző tárhelye megtelt). Próbálj kisebb képet.');
+                return;
+            }
+            item = { id: company.id, name, img: company.logo, category: cat, desc, website: site, addedAt: company.addedAt, baseOpens: 0, premium: false, registered: true };
+            items.push(item);
+            createCard(item, true);
+        } else {
+            // Vendég regisztráció
+            if (!ok) return;
+            company = { id: Date.now(), name, email, pass: await hash(pass), type: 'guest', addedAt: Date.now() };
+            companies.push(company);
+            LS.set('bu_companies', companies);
+        }
+
+        LS.set('bu_session', company.email);
+        registerForm.reset(); pendingLogo = null; renderPreview(); descCount.textContent = '0 / 300';
+        closeAuth(); resetAll(false);
+        updateAuthUI(); renderDiscover();
+        confetti();
+        showToast(`🎉 Üdv a fedélzeten, ${name}! Sikeres regisztráció.`);
+    });
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = $('logEmail').value.trim().toLowerCase();
+        const c = companies.find(x => x.email === email);
+        const good = c && c.pass === await hash($('logPass').value);
+        if (!setErr(loginForm, 'logPass', good ? '' : 'Hibás e-mail cím vagy jelszó.')) return;
+        LS.set('bu_session', c.email);
+        loginForm.reset();
+        closeAuth(); updateAuthUI();
+        showToast('👋 Üdv újra, ' + c.name + '!');
+    });
+
+    function renderAccount() {
+        const c = currentCompany();
+        accountView.replaceChildren();
+        if (!c) { showView('login'); return; }
+        
+        const isComp = c.type === 'company' || c.logo;
+        const head = el('div', 'acc-head');
+        const box = el('div');
+        
+        if (isComp) {
+            const im = new Image(); im.src = c.logo; im.alt = '';
+            head.append(im);
+            box.append(el('h4', null, c.name), el('p', null, categoryNames[c.category] || c.category || 'Cég'), el('p', null, c.email));
+        } else {
+            box.append(el('h4', null, c.name), el('p', null, 'Vendég fiók (Értékelő)'), el('p', null, c.email));
+        }
+        head.append(box);
+
+        accountView.append(head);
+
+        if (isComp) {
+            const it = items.find(i => i.id === c.id);
+            const left = Math.max(0, Math.ceil((NEW_DAYS * DAY - (Date.now() - c.addedAt)) / DAY));
+            accountView.append(
+                el('p', 'acc-stat', (left > 0 ? `🆕 Az ÚJ jelvényed még ${left} napig látszik.` : 'Az ÚJ jelvényed lejárt.') + '  👁 ' + (it ? totalOpens(it) : 0) + ' megnyitás'),
+                el('div', 'acc-premium', '👑 Prémium csomag – hamarosan! Mindig látható, nagyobb kártya és kiemelt megjelenés.')
+            );
+            const open = el('button', 'btn-primary', 'Kártyám megnyitása'); open.type = 'button';
+            open.onclick = () => { closeAuth(); if (it) openModal(it); };
+            accountView.append(open);
+        } else {
+            accountView.append(el('p', 'acc-stat', 'Vendégként szabadon értékelheted a bejelentkezést követően a logókat az 1-5 skálás dollár csillagokkal.'));
+        }
+
+        const out = el('button', 'btn-ghost', 'Kilépés'); out.type = 'button';
+        out.onclick = () => { LS.set('bu_session', null); closeAuth(); updateAuthUI(); showToast('Sikeres kilépés.'); };
+        accountView.append(out);
+    }
+    updateAuthUI();
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { closeModal(); closeFilter(); closeAuth(); }
+    });
+
     window.addEventListener('resize', () => {
         checkMobileState(); updateBounds();
-        if (filterState.searchTerm || filterState.activeCategory) {
-            const matching = cardElements.filter(i => !i.element.classList.contains('filtered-out'));
-            calculateCenteredGrid(matching);
-        }
+        if (filterState.tokens.length || filterState.activeCategory || filterState.special) filterItems();
     });
 };

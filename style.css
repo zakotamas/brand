@@ -6,6 +6,8 @@ body {
     background-color: #121212;
     color: #e0e0e0;
     overflow-x: hidden;
+    /* 5. pont: Mobil eszközön a fentrol lehúzásos oldalfrissítés megakadályozása */
+    overscroll-behavior-y: none;
 }
 
 /* --------------------------------------
@@ -63,7 +65,6 @@ header {
 
 .logo-short { display: none; }
 
-/* Módosított kereső wrapper a szűrő gombhoz */
 .search-wrapper {
     position: relative; 
     width: 100%;
@@ -83,7 +84,7 @@ header {
     transition: all 0.3s;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
-    padding-right: 40px; /* Hely a törlés gombnak */
+    padding-right: 40px; 
 }
 
 #searchInput:focus {
@@ -95,7 +96,7 @@ header {
 .clear-search-btn {
     position: absolute;
     top: 50%;
-    right: 60px; /* Elmozdítva a szűrő gomb miatt */
+    right: 60px; 
     transform: translateY(-50%);
     background: none;
     border: none;
@@ -116,7 +117,6 @@ header {
     color: #4fc3f7;
 }
 
-/* --- ÚJ: Szűrő gomb stílus --- */
 .filter-toggle-btn {
     background-color: #2c2c2c;
     border: none;
@@ -182,9 +182,8 @@ nav ul li a:hover {
     color: #121212;
 }
 
-.mobile-menu-footer {
-    display: none; 
-}
+.mobile-discover-section { display: none; }
+.mobile-menu-footer { display: none; }
 
 /* Hamburger menü */
 .hamburger {
@@ -273,7 +272,7 @@ nav ul li a:hover {
 .card.filtered-out { opacity: 0; pointer-events: none; }
 
 /* --------------------------------------
- * MODALOK
+ * MODALOK ÉS ÉRTÉKELÉSI RENDSZER (3. pont)
  * -------------------------------------- */
 
 .modal {
@@ -338,8 +337,68 @@ nav ul li a:hover {
     font-size: 0.85em;
     font-weight: 600;
     text-transform: uppercase;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     border: 1px solid rgba(79, 195, 247, 0.3);
+}
+
+/* --- Értékelési szekció dizájn (3. pont) --- */
+.rating-section {
+    background: rgba(255, 213, 79, 0.05);
+    border: 1px solid rgba(255, 213, 79, 0.2);
+    border-radius: 12px;
+    padding: 12px 15px;
+    margin: 0 auto 20px auto;
+    max-width: 400px;
+}
+.rating-prompt {
+    font-size: 0.85rem;
+    color: #ccc;
+    margin: 0 0 8px 0;
+    text-align: center;
+}
+.star-rating {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.dollar-star {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    filter: grayscale(100%) opacity(0.4);
+    transition: transform 0.2s, filter 0.2s;
+    padding: 0;
+}
+.dollar-star:hover {
+    transform: scale(1.2);
+    filter: grayscale(30%) opacity(0.8);
+}
+.dollar-star.active {
+    filter: grayscale(0%) opacity(1) drop-shadow(0 0 6px rgba(255, 213, 79, 0.8));
+}
+.rating-stats {
+    font-size: 0.8rem;
+    color: #ffd54f;
+    margin: 0;
+    text-align: center;
+}
+
+/* Részecske effektus (3. pont) */
+.rating-particle {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 30005;
+    animation: ratingFly 0.8s ease-out forwards;
+}
+@keyframes ratingFly {
+    0% { transform: translate(0, 0) scale(1.2); opacity: 1; }
+    50% { filter: drop-shadow(0 0 8px #ffd54f); }
+    100% { transform: translate(var(--dx), var(--dy)) scale(0.3); opacity: 0; }
 }
 
 .modal-content h2 {
@@ -393,11 +452,10 @@ nav ul li a:hover {
     box-shadow: 0 0 15px rgba(79, 195, 247, 0.5);
 }
 
-/* --- ÚJ: Szűrő Modal Stílus --- */
 .filter-modal {
     display: none;
     position: fixed;
-    z-index: 20001; /* A másik modal felett is */
+    z-index: 20001; 
     left: 0;
     top: 0;
     width: 100%;
@@ -405,7 +463,7 @@ nav ul li a:hover {
     background-color: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(3px);
     justify-content: center;
-    align-items: center; /* Mobilon inkább felülről? Most középre */
+    align-items: center; 
 }
 
 .filter-modal.active {
@@ -507,7 +565,6 @@ nav ul li a:hover {
     color: #fff;
 }
 
-/* --- Mobil Toast --- */
 .mobile-warning-toast {
     position: fixed;
     bottom: -100%; 
@@ -571,44 +628,240 @@ nav ul li a:hover {
     color: #121212;
 }
 
+/* --- Prémium kártya --- */
+.card.premium {
+    width: 152px; height: 152px;
+    border: 1px solid #ffd54f;
+    background: linear-gradient(160deg, #3a3320, #2c2c2c 65%);
+    box-shadow: 0 0 22px rgba(255, 193, 7, 0.35), 0 6px 20px rgba(0, 0, 0, 0.7);
+}
+.card.premium img { max-width: 88px; max-height: 88px; }
+.card.premium h3 { color: #ffe082; font-size: 0.9em; }
+.card.premium:hover, .card.premium.dragging { box-shadow: 0 0 36px rgba(255, 193, 7, 0.85), 0 0 15px rgba(255, 255, 255, 0.3); }
+.card.premium-bg { opacity: 0.45; }
+.badge-crown { position: absolute; top: -12px; left: -6px; font-size: 1.3rem; pointer-events: none; filter: drop-shadow(0 2px 3px #000); }
+
+/* --- ÚJ jelvény --- */
+.badge-new, .mini-new {
+    background: linear-gradient(135deg, #43e97b, #1fb86a);
+    color: #07210f; font-weight: 800; letter-spacing: .5px;
+    border-radius: 12px; pointer-events: none;
+}
+.badge-new { position: absolute; top: -8px; right: -8px; font-size: 0.7rem; padding: 3px 8px; box-shadow: 0 0 12px rgba(67, 233, 123, .7); animation: newPulse 1.8s ease-in-out infinite; }
+@keyframes newPulse { 50% { box-shadow: 0 0 18px rgba(67, 233, 123, 1); transform: scale(1.08); } }
+.card.highlight { animation: glowPulse 1.2s ease-in-out 6; }
+@keyframes glowPulse { 50% { box-shadow: 0 0 45px rgba(67, 233, 123, .95), 0 0 20px rgba(79, 195, 247, .8); } }
+
+/* --- Felfedező sáv (Asztali) --- */
+.discover-bar {
+    position: fixed; top: 70px; left: 0; width: 100%; height: 54px;
+    z-index: 9000; box-sizing: border-box; padding: 0 20px;
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(24, 24, 24, .93); backdrop-filter: blur(8px);
+    border-bottom: 1px solid #2a2a2a;
+}
+.dtabs { display: flex; gap: 6px; flex-shrink: 0; }
+.dtab, .dice {
+    background: #2c2c2c; border: 1px solid #3a3a3a; color: #e0e0e0;
+    border-radius: 20px; padding: 7px 13px; font-size: .85rem; cursor: pointer;
+    white-space: nowrap; transition: all .2s; font-family: inherit;
+}
+.dtab:hover, .dice:hover { border-color: #4fc3f7; }
+.dtab.active { background: rgba(79, 195, 247, .18); border-color: #4fc3f7; color: #4fc3f7; }
+.dice { flex-shrink: 0; padding: 6px 11px; }
+.dlist { display: flex; gap: 8px; flex: 1; min-width: 0; overflow-x: auto; align-items: center; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding: 4px 0; }
+.dlist::-webkit-scrollbar { display: none; }
+.dempty { color: #888; font-size: .85rem; }
+.mini {
+    display: flex; align-items: center; gap: 7px; flex-shrink: 0; cursor: pointer;
+    background: #2c2c2c; border: 1px solid #3a3a3a; color: #ddd; font-family: inherit;
+    border-radius: 20px; padding: 3px 12px 3px 4px; font-size: .8rem; transition: border-color .2s;
+}
+.mini:hover { border-color: #4fc3f7; }
+.mini.is-premium { border-color: #ffd54f; }
+.mini img { width: 28px; height: 28px; object-fit: contain; border-radius: 50%; background: #1b1b1b; }
+.mini .rank { font-style: normal; font-weight: 700; color: #4fc3f7; font-size: .75rem; padding-left: 6px; }
+.mini-new { font-size: .6rem; padding: 2px 6px; }
+
+.result-info {
+    position: fixed; left: 50%; top: calc(70px + 54px + 8px); transform: translateX(-50%);
+    z-index: 8000; background: rgba(79, 195, 247, .15); border: 1px solid rgba(79, 195, 247, .4);
+    color: #4fc3f7; font-size: .85rem; padding: 5px 16px; border-radius: 20px;
+    display: none; pointer-events: none; text-align: center; max-width: 90vw;
+}
+.result-info.active { display: block; }
+
+.toast {
+    position: fixed; left: 50%; top: calc(70px + 54px + 14px); transform: translate(-50%, -30px);
+    width: 90%; max-width: 460px; box-sizing: border-box; z-index: 30001;
+    background: rgba(30, 30, 30, .97); border: 1px solid rgba(67, 233, 123, .6);
+    color: #e0e0e0; padding: 14px 18px; border-radius: 12px; font-size: .92rem; line-height: 1.4;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .6); opacity: 0; pointer-events: none; transition: all .4s;
+}
+.toast.active { opacity: 1; transform: translate(-50%, 0); }
+
+.confetti { position: fixed; width: 8px; height: 12px; z-index: 30002; pointer-events: none; animation: confFly 1.5s ease-out forwards; }
+@keyframes confFly { to { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
+
+/* --- Belépés gomb a fejlécben --- */
+.auth-btn {
+    background: rgba(79, 195, 247, .12); border: 1px solid rgba(79, 195, 247, .5); color: #4fc3f7;
+    border-radius: 8px; padding: 8px 14px; margin-right: 12px; cursor: pointer; font-family: inherit;
+    font-weight: 600; font-size: .9rem; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all .2s;
+}
+.auth-btn:hover { background: #4fc3f7; color: #121212; }
+.auth-btn.logged { background: rgba(67, 233, 123, .12); border-color: rgba(67, 233, 123, .6); color: #43e97b; }
+.auth-label { max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
+
+/* --- Modal kiegészítők --- */
+.modal-badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 12px; }
+.modal-badges:empty { display: none; }
+.mbadge { font-size: .8rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+.mbadge.gold { background: rgba(255, 213, 79, .15); color: #ffd54f; border: 1px solid rgba(255, 213, 79, .5); }
+.mbadge.green { background: rgba(67, 233, 123, .15); color: #43e97b; border: 1px solid rgba(67, 233, 123, .5); }
+.mbadge.fire { background: rgba(255, 112, 67, .15); color: #ff8a65; border: 1px solid rgba(255, 112, 67, .5); }
+.modal-content p.modal-stats { text-align: center; color: #888; font-size: .85rem; margin: 6px 0 0; }
+.site-btn {
+    display: inline-block; margin-top: 14px; padding: 9px 22px; border-radius: 25px;
+    background: #4fc3f7; color: #121212; font-weight: 700; text-decoration: none; transition: box-shadow .3s;
+}
+.site-btn:hover { box-shadow: 0 0 15px rgba(79, 195, 247, .6); }
+.filter-subtitle { margin: 14px 0 10px; }
+
+/* --- Regisztrációs ablak (4. pont) --- */
+.auth-modal { align-items: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 0; box-sizing: border-box; }
+.auth-content { max-width: 460px; margin: auto; box-sizing: border-box; }
+.auth-tabs { display: flex; gap: 6px; margin: 14px 0 18px; background: #2a2a2a; padding: 4px; border-radius: 10px; }
+.auth-tabs button { flex: 1; background: none; border: none; color: #aaa; padding: 9px; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: .95rem; }
+.auth-tabs button.active { background: #4fc3f7; color: #121212; }
+.field { margin-bottom: 14px; }
+.field label { display: flex; justify-content: space-between; gap: 8px; font-size: .88rem; color: #ccc; margin-bottom: 6px; font-weight: 600; }
+.hint, .counter { font-weight: 400; color: #888; font-size: .8rem; }
+.field input, .field select, .field textarea {
+    width: 100%; box-sizing: border-box; background: #2c2c2c; color: #e0e0e0;
+    border: 1px solid #3d3d3d; border-radius: 8px; padding: 10px 12px; font-size: 16px; font-family: inherit;
+}
+.field textarea { resize: vertical; min-height: 80px; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #4fc3f7; box-shadow: 0 0 0 2px rgba(79, 195, 247, .3); }
+.field input[type=file] { padding: 8px; font-size: .9rem; }
+.reg-type-selector { display: flex; gap: 15px; margin-top: 5px; }
+.radio-label { font-weight: 400 !important; font-size: 0.9rem !important; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #ddd; }
+.err { display: block; color: #ff7a7a; font-size: .8rem; min-height: 0; margin-top: 4px; }
+.err:empty { display: none; }
+.preview-wrap { text-align: center; margin: 0 0 18px; padding: 18px 0 8px; border: 1px dashed #3d3d3d; border-radius: 12px; animation: popIn .4s cubic-bezier(.175, .885, .32, 1.275); }
+.preview-wrap .hint { margin: 0 0 16px; }
+.card.static { position: relative; margin: 0 auto 10px; transform: none; cursor: default; box-shadow: 0 0 25px rgba(67, 233, 123, .45); }
+.btn-primary {
+    width: 100%; background: #4fc3f7; color: #121212; border: none; border-radius: 10px;
+    padding: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: box-shadow .3s;
+}
+.btn-primary:hover { box-shadow: 0 0 18px rgba(79, 195, 247, .6); }
+.btn-ghost { width: 100%; background: none; border: 1px solid #555; color: #ccc; border-radius: 10px; padding: 11px; margin-top: 10px; cursor: pointer; font-family: inherit; font-size: .95rem; }
+.btn-ghost:hover { border-color: #ff7a7a; color: #ff7a7a; }
+.acc-head { display: flex; align-items: center; gap: 14px; margin: 16px 0; }
+.acc-head img { width: 64px; height: 64px; object-fit: contain; background: #2c2c2c; border-radius: 12px; padding: 6px; }
+.acc-head h4 { margin: 0 0 4px; color: #4fc3f7; font-size: 1.15rem; }
+.acc-head p { margin: 0; font-size: .85rem; color: #999; word-break: break-all; }
+.acc-stat { font-size: .9rem; color: #bbb; line-height: 1.5; }
+.acc-premium { background: rgba(255, 213, 79, .08); border: 1px dashed rgba(255, 213, 79, .5); color: #ffd54f; border-radius: 10px; padding: 12px; font-size: .88rem; margin: 14px 0 16px; line-height: 1.5; }
+
+/* --- Reszponzív (2. és 6. pont mobil menü integráció) --- */
 @media (max-width: 768px) {
-    .nav-container { padding: 0 10px; }
     .logo-full { display: none; }
     .logo-short { display: inline; }
     .header-left, .header-right { flex: 0 0 auto; }
     .header-center { flex: 1; padding: 0 10px; }
     .hamburger { display: flex; }
     
+    /* Elrejtjük az asztali felfedező sávot mobilon, helyette a menübe tesszük */
+    .discover-bar { display: none; }
+
     nav {
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: flex-start;
         position: fixed;
         top: 70px;
         left: 0;
         width: 100%;
         height: 0;
         background-color: #1f1f1f;
-        overflow: hidden;
+        overflow-y: auto;
         transition: height 0.4s ease;
         border-top: 1px solid #333;
         z-index: 150;
+        box-sizing: border-box;
     }
 
-    nav.active { height: calc(100vh - 70px); padding: 40px 0; }
-    nav ul { flex-direction: column; align-items: center; width: 100%; }
+    nav.active { height: calc(100vh - 70px); padding: 25px 20px; }
+    
+    .mobile-discover-section {
+        display: block;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #333;
+        padding-bottom: 20px;
+    }
+    .mobile-menu-title {
+        color: #4fc3f7;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin: 0 0 10px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .mobile-dtabs {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .mobile-dtab {
+        width: 100%;
+        text-align: left;
+        padding: 10px 14px;
+        border-radius: 8px;
+    }
+    .mobile-dice-btn {
+        width: 100%;
+        background-color: #2c2c2c;
+        border: 1px solid #4fc3f7;
+        color: #4fc3f7;
+        padding: 10px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    nav ul { flex-direction: column; align-items: stretch; width: 100%; }
+    nav ul li a { padding: 12px 14px; border-radius: 8px; margin-bottom: 6px; }
+
     .mobile-menu-footer {
         display: block;
-        padding: 20px;
+        padding: 15px 0 0 0;
         text-align: center;
         border-top: 1px solid rgba(79, 195, 247, 0.2);
-        margin: 0 40px 40px 40px;
+        margin-top: 20px;
     }
-    .mobile-menu-footer p { font-size: 0.9em; font-style: italic; color: #4fc3f7; opacity: 0.8; }
+    .mobile-menu-footer p { font-size: 0.85em; font-style: italic; color: #4fc3f7; opacity: 0.8; }
+    
     .card { width: 90px; height: 90px; }
+    .card.premium { width: 114px; height: 114px; }
+    .card.premium img { max-width: 70px; max-height: 70px; }
     .card img { max-width: 55px; max-height: 55px; }
+    .badge-crown { font-size: 1.1rem; }
     
     .search-wrapper { max-width: 100%; }
-    #searchInput { font-size: 16px; } /* iOS zoom fix */
+    #searchInput { font-size: 16px; } 
     .clear-search-btn { right: 55px; }
+    .modal-content { padding: 28px 20px; }
+    .modal-content h2 { font-size: 1.7em; }
+    .filter-content { padding: 22px 18px; }
+    .toast { top: calc(70px + 14px); }
+}
+
+@media (max-width: 360px) {
+    .search-wrapper { gap: 6px; }
+    .filter-toggle-btn { width: 38px; }
+    .nav-container { padding: 0 6px; }
 }
