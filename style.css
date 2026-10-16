@@ -10,10 +10,6 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
-/* --------------------------------------
- * HEADER ÉS NAVIGÁCIÓ (4. pont: sorrend & elrendezés)
- * -------------------------------------- */
-
 header {
     background-color: #1f1f1f;
     width: 100%;
@@ -36,14 +32,12 @@ header {
     gap: 15px;
 }
 
-/* Bal oldalon: logó és név */
 .header-left {
     display: flex;
     align-items: center;
     flex-shrink: 0;
 }
 
-/* Középen: keresés és szűrő gomb */
 .header-center {
     display: flex;
     align-items: center;
@@ -53,7 +47,6 @@ header {
     gap: 10px;
 }
 
-/* Jobb oldalon: bejelentkezés ikon és hamburger menü */
 .header-right {
     display: flex;
     align-items: center;
@@ -72,7 +65,6 @@ header {
 
 .logo-short { display: none; }
 
-/* 1. pont: Keresés mező optimális méretezése kis képernyőn is */
 .search-wrapper {
     position: relative; 
     width: 100%;
@@ -214,7 +206,6 @@ nav ul li a:hover {
 
 .mobile-menu-footer { display: none; }
 
-/* Hamburger menü */
 .hamburger {
     display: none;
     cursor: pointer;
@@ -237,10 +228,6 @@ nav ul li a:hover {
 .hamburger.active .bar1 { transform: rotate(-45deg) translate(-5px, 6px); }
 .hamburger.active .bar2 { opacity: 0; }
 .hamburger.active .bar3 { transform: rotate(45deg) translate(-5px, -6px); }
-
-/* --------------------------------------
- * KÁRTYA TÉR
- * -------------------------------------- */
 
 .scene-container {
     position: relative;
@@ -299,10 +286,6 @@ nav ul li a:hover {
 
 .card.dimmed { opacity: 0.3; }
 .card.filtered-out { opacity: 0; pointer-events: none; }
-
-/* --------------------------------------
- * MODALOK ÉS MODERNIZÁLT FORMOK (5. és 6. pont)
- * -------------------------------------- */
 
 .modal {
     display: none;
@@ -657,7 +640,6 @@ nav ul li a:hover {
     color: #121212;
 }
 
-/* --- Prémium kártya --- */
 .card.premium {
     width: 152px; height: 152px;
     border: 1px solid #ffd54f;
@@ -669,7 +651,6 @@ nav ul li a:hover {
 .card.premium:hover, .card.premium.dragging { box-shadow: 0 0 36px rgba(255, 193, 7, 0.85), 0 0 15px rgba(255, 255, 255, 0.3); }
 .badge-crown { position: absolute; top: -12px; left: -6px; font-size: 1.3rem; pointer-events: none; filter: drop-shadow(0 2px 3px #000); }
 
-/* --- ÚJ jelvény --- */
 .badge-new, .mini-new {
     background: linear-gradient(135deg, #43e97b, #1fb86a);
     color: #07210f; font-weight: 800; letter-spacing: .5px;
@@ -680,7 +661,6 @@ nav ul li a:hover {
 .card.highlight { animation: glowPulse 1.2s ease-in-out 6; }
 @keyframes glowPulse { 50% { box-shadow: 0 0 45px rgba(67, 233, 123, .95), 0 0 20px rgba(79, 195, 247, .8); } }
 
-/* --- Felfedező sáv (Asztali) --- */
 .discover-bar {
     position: fixed; top: 70px; left: 0; width: 100%; height: 54px;
     z-index: 9000; box-sizing: border-box; padding: 0 20px;
@@ -731,7 +711,6 @@ nav ul li a:hover {
 .confetti { position: fixed; width: 8px; height: 12px; z-index: 30002; pointer-events: none; animation: confFly 1.5s ease-out forwards; }
 @keyframes confFly { to { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
 
-/* Fiók / Belépés gomb dizájn */
 .auth-btn {
     background: rgba(79, 195, 247, .12); border: 1px solid rgba(79, 195, 247, .5); color: #4fc3f7;
     border-radius: 8px; padding: 8px 12px; cursor: pointer; font-family: inherit;
@@ -755,7 +734,6 @@ nav ul li a:hover {
 }
 .site-btn:hover { box-shadow: 0 0 15px rgba(79, 195, 247, .6); }
 
-/* --- Modernizált regisztrációs elemek (5. és 6. pont) --- */
 .auth-modal { align-items: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 0; box-sizing: border-box; }
 .auth-content { max-width: 460px; margin: auto; box-sizing: border-box; }
 .auth-tabs { display: flex; gap: 6px; margin: 14px 0 18px; background: #2a2a2a; padding: 4px; border-radius: 10px; }
@@ -773,7 +751,6 @@ nav ul li a:hover {
 .field textarea { resize: vertical; min-height: 80px; }
 .field input:focus, .field textarea:focus { outline: none; border-color: #4fc3f7; box-shadow: 0 0 0 2px rgba(79, 195, 247, .3); }
 
-/* Modern Rádiógombok cég/vendég választáshoz */
 .reg-type-selector { display: flex; gap: 10px; margin-top: 5px; }
 .radio-card {
     flex: 1;
@@ -797,7 +774,6 @@ nav ul li a:hover {
     background: rgba(79, 195, 247, 0.1);
 }
 
-/* Drag and Drop zóna */
 .file-dropzone {
     border: 2px dashed #444;
     border-radius: 10px;
@@ -816,7 +792,6 @@ nav ul li a:hover {
 .dropzone-icon { font-size: 1.8rem; }
 .dropzone-text { font-size: 0.85rem; color: #aaa; }
 
-/* Több kategória választó chipek (max 3) */
 .category-select-grid {
     display: flex;
     flex-wrap: wrap;
@@ -853,17 +828,43 @@ nav ul li a:hover {
     padding: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: box-shadow .3s;
 }
 .btn-primary:hover { box-shadow: 0 0 18px rgba(79, 195, 247, .6); }
+
 .btn-ghost { width: 100%; background: none; border: 1px solid #555; color: #ccc; border-radius: 10px; padding: 11px; margin-top: 10px; cursor: pointer; font-family: inherit; font-size: .95rem; }
-.btn-ghost:hover { border-color: #ff7a7a; color: #ff7a7a; }
+.btn-ghost:hover { border-color: #4fc3f7; color: #4fc3f7; }
+
+.btn-danger { width: 100%; background: none; border: 1px solid #ff7a7a; color: #ff7a7a; border-radius: 10px; padding: 11px; margin-top: 10px; cursor: pointer; font-family: inherit; font-size: .95rem; transition: all 0.2s; }
+.btn-danger:hover { background: rgba(255, 122, 122, 0.15); }
 
 .acc-head { display: flex; align-items: center; gap: 14px; margin: 16px 0; }
 .acc-head img { width: 64px; height: 64px; object-fit: contain; background: #2c2c2c; border-radius: 12px; padding: 6px; }
 .acc-head h4 { margin: 0 0 4px; color: #4fc3f7; font-size: 1.15rem; }
 .acc-head p { margin: 0; font-size: .85rem; color: #999; word-break: break-all; }
 .acc-stat { font-size: .9rem; color: #bbb; line-height: 1.5; }
-.acc-premium { background: rgba(255, 213, 79, .08); border: 1px dashed rgba(255, 213, 79, .5); color: #ffd54f; border-radius: 10px; padding: 12px; font-size: .88rem; margin: 14px 0 16px; line-height: 1.5; }
 
-/* --- Reszponzív mobil nézet --- */
+.acc-stats-box {
+    background: rgba(79, 195, 247, 0.08);
+    border: 1px solid rgba(79, 195, 247, 0.3);
+    border-radius: 10px;
+    padding: 12px;
+    margin: 12px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #ddd;
+}
+.stat-item span { color: #4fc3f7; font-weight: 600; }
+
+.edit-profile-form {
+    border-top: 1px solid #333;
+    padding-top: 12px;
+    margin-top: 12px;
+}
+
 @media (max-width: 768px) {
     .logo-full { display: none; }
     .logo-short { display: inline; }

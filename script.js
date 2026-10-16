@@ -47,7 +47,7 @@ window.onload = () => {
     const WARNING_SEEN_KEY = 'mobileWarningSeen';
 
     // ----------------------------------------------------------------
-    // KONFIGURÁCIÓ ÉS VÁLTOZÓk
+    // KONFIGURÁCIÓ ÉS VÁLTOZÓK
     // ----------------------------------------------------------------
     let draggedItem = null;
     const dragDistanceThreshold = 5;
@@ -167,122 +167,64 @@ window.onload = () => {
             id: 20, name: "Red-Bull", img: "img/l20.png", category: "food", categories: ["food"],
             desc: "Az osztrák Red Bull energiaital-gyártó vállalat, amely a 'Red Bull szárnyakat ad' szlogennel vált világhírűvé. Jelentős szereplő a sport- és extrémsport szponzorációban." 
         },
-        { 
-            id: 21, name: "Szentkirályi", img: "img/l21.png", category: "food", categories: ["food"], desc: "Magyar ásványvíz márka." },
-        { 
-            id: 22, name: "Zwack", img: "img/l22.png", category: "food", categories: ["food"], desc: "Magyar italgyártó vállalat." },
-        { 
-            id: 23, name: "Heineken", img: "img/l23.png", category: "food", categories: ["food"], desc: "Holland sörgyártó vállalat." },
-        { 
-            id: 24, name: "Jack Daniels", img: "img/l24.png", category: "food", categories: ["food"], desc: "Amerikai whiskey márka." },
-        { 
-            id: 25, name: "OMV", img: "img/l25.png", category: "auto", categories: ["auto"], desc: "Osztrák olaj- és gázipari vállalat." },
-        { 
-            id: 26, name: "MOL", img: "img/l26.png", category: "auto", categories: ["auto"], desc: "Magyar olaj- és gázipari vállalat." },
-        { 
-            id: 27, name: "Shell", img: "img/l27.png", category: "auto", categories: ["auto"], desc: "Globális energiavállalat." },
-        { 
-            id: 28, name: "Turkish Airlines", img: "img/l28.png", category: "auto", categories: ["auto"], desc: "Török nemzeti légitársaság." },
-        { 
-            id: 29, name: "Petronas", img: "img/l29.png", category: "auto", categories: ["auto"], desc: "Malajziai olajvállalat." },
-        { 
-            id: 30, name: "Michelin", img: "img/l30.png", category: "auto", categories: ["auto"], desc: "Francia gumiabroncs-gyártó." },
-        { 
-            id: 31, name: "Bridgestone", img: "img/l31.png", category: "auto", categories: ["auto"], desc: "Japán gumiabroncs-gyártó." },
-        { 
-            id: 32, name: "Nestlé", img: "img/l32.png", category: "food", categories: ["food"], desc: "Svájci élelmiszeripari vállalat." },
-        { 
-            id: 33, name: "TikTok", img: "img/l33.png", category: "social", categories: ["social"], desc: "Kínai közösségi média." },
-        { 
-            id: 34, name: "Facebook", img: "img/l34.png", category: "social", categories: ["social"], desc: "Meta Platforms hálózata." },
-        { 
-            id: 35, name: "Hugo Boss", img: "img/l35.png", category: "fashion", categories: ["fashion"], desc: "Német divatmárka." },
-        { 
-            id: 36, name: "Louis Vuitton", img: "img/l36.png", category: "fashion", categories: ["fashion"], desc: "Francia luxus divatmárka." },
-        { 
-            id: 37, name: "Ralph Lauren", img: "img/l37.png", category: "fashion", categories: ["fashion"], desc: "Amerikai divatmárka." },
-        { 
-            id: 38, name: "Xbox", img: "img/l38.png", category: "tech", categories: ["tech"], desc: "Microsoft konzol." },
-        { 
-            id: 39, name: "PlayStation", img: "img/l39.png", category: "tech", categories: ["tech"], desc: "Sony konzol." },
-        { 
-            id: 40, name: "Nvidia", img: "img/l40.png", category: "tech", categories: ["tech"], desc: "GPU gyártó." },
-        { 
-            id: 41, name: "Intel", img: "img/l41.png", category: "tech", categories: ["tech"], desc: "Félvezetőgyártó." },
-        { 
-            id: 42, name: "AMD", img: "img/l42.png", category: "tech", categories: ["tech"], desc: "CPU/GPU gyártó." },
-        { 
-            id: 43, name: "Razer", img: "img/l43.png", category: "tech", categories: ["tech"], desc: "Gamer perifériák." },
-        { 
-            id: 44, name: "Suzuki", img: "img/l44.png", category: "auto", categories: ["auto"], desc: "Japán autógyártó." },
-        { 
-            id: 45, name: "Burger King", img: "img/l45.png", category: "food", categories: ["food"], desc: "Gyorsétteremlánc." },
-        { 
-            id: 46, name: "Toyota", img: "img/l46.png", category: "auto", categories: ["auto"], desc: "Japán autógyártó." },
-        { 
-            id: 47, name: "VW", img: "img/l47.png", category: "auto", categories: ["auto"], desc: "Német autógyártó." },
-        { 
-            id: 48, name: "OTP", img: "img/l48.png", category: "tech", categories: ["tech"], desc: "Bankcsoport." },
-        { 
-            id: 49, name: "Raiffeisen", img: "img/l49.png", category: "tech", categories: ["tech"], desc: "Bankcsoport." },
-        { 
-            id: 50, name: "Erste", img: "img/l50.png", category: "tech", categories: ["tech"], desc: "Bankcsoport." },
-        { 
-            id: 51, name: "YouTube", img: "img/l51.png", category: "social", categories: ["social"], desc: "Videómegosztó." },
-        { 
-            id: 52, name: "BMW", img: "img/l52.png", category: "auto", categories: ["auto"], desc: "Prémium autógyártó." },
-        { 
-            id: 53, name: "Rolls-Royce", img: "img/l53.png", category: "auto", categories: ["auto"], desc: "Luxusautógyártó." },
-        { 
-            id: 54, name: "Netflix", img: "img/l54.png", category: "social", categories: ["social"], desc: "Streaming szolgáltató." },
-        { 
-            id: 55, name: "Walt Disney", img: "img/l55.png", category: "social", categories: ["social"], desc: "Szórakoztatóipar." },
-        { 
-            id: 56, name: "SAP", img: "img/l56.png", category: "tech", categories: ["tech"], desc: "Szoftvervállalat." },
-        { 
-            id: 57, name: "Visa", img: "img/l57.png", category: "tech", categories: ["tech"], desc: "Pénzügyi szolgáltató." },
-        { 
-            id: 58, name: "MasterCard", img: "img/l58.png", category: "tech", categories: ["tech"], desc: "Pénzügyi szolgáltató." },
-        { 
-            id: 59, name: "Cisco", img: "img/l59.png", category: "tech", categories: ["tech"], desc: "Hálózati berendezések." },
-        { 
-            id: 60, name: "Caterpillar", img: "img/l60.png", category: "auto", categories: ["auto"], desc: "Nehézgépek." },
-        { 
-            id: 61, name: "Bosch", img: "img/l61.png", category: "tech", categories: ["tech"], desc: "Ipari technológiák." },
-        { 
-            id: 62, name: "Liebherr", img: "img/l62.png", category: "auto", categories: ["auto"], desc: "Ipari gépek." },
-        { 
-            id: 63, name: "L'Oréal", img: "img/l63.png", category: "fashion", categories: ["fashion"], desc: "Kozmetikai óriás." },
-        { 
-            id: 64, name: "Airbus", img: "img/l64.png", category: "auto", categories: ["auto"], desc: "Repülőgépgyártó." },
-        { 
-            id: 65, name: "HSBC", img: "img/l65.png", category: "tech", categories: ["tech"], desc: "Multinacionális bank." },
-        { 
-            id: 66, name: "Rolex", img: "img/l66.png", category: "fashion", categories: ["fashion"], desc: "Luxusóra márka." },
-        { 
-            id: 67, name: "Hublot", img: "img/l67.png", category: "fashion", categories: ["fashion"], desc: "Luxusóra márka." },
-        { 
-            id: 68, name: "Omega", img: "img/l68.png", category: "fashion", categories: ["fashion"], desc: "Óragyártó." },
-        { 
-            id: 69, name: "Breitling", img: "img/l69.png", category: "fashion", categories: ["fashion"], desc: "Óragyártó." },
-        { 
-            id: 70, name: "Patek Philippe", img: "img/l70.png", category: "fashion", categories: ["fashion"], desc: "Luxusóra márka." },
-        { 
-            id: 71, name: "Tag Heuer", img: "img/l71.png", category: "fashion", categories: ["fashion"], desc: "Óragyártó." },
-        { 
-            id: 72, name: "Prada", img: "img/l72.png", category: "fashion", categories: ["fashion"], desc: "Luxus divatmárka." },
-        { 
-            id: 73, name: "Armani", img: "img/l73.png", category: "fashion", categories: ["fashion"], desc: "Divatmárka." },
-        { 
-            id: 74, name: "Porsche", img: "img/l74.png", category: "auto", categories: ["auto"], desc: "Sportautógyártó." },
-        { 
-            id: 75, name: "Bentley", img: "img/l75.png", category: "auto", categories: ["auto"], desc: "Luxusautógyártó." },
-        { 
-            id: 76, name: "Gucci", img: "img/l76.png", category: "fashion", categories: ["fashion"], desc: "Luxus divatmárka." },
-        { 
-            id: 77, name: "Dior", img: "img/l77.png", category: "fashion", categories: ["fashion"], desc: "Luxus divatmárka." },
-        { 
-            id: 78, name: "Versace", img: "img/l78.png", category: "fashion", categories: ["fashion"], desc: "Divatmárka." }
+        { id: 21, name: "Szentkirályi", img: "img/l21.png", category: "food", categories: ["food"], desc: "Magyar ásványvíz márka." },
+        { id: 22, name: "Zwack", img: "img/l22.png", category: "food", categories: ["food"], desc: "Magyar italgyártó vállalat." },
+        { id: 23, name: "Heineken", img: "img/l23.png", category: "food", categories: ["food"], desc: "Holland sörgyártó vállalat." },
+        { id: 24, name: "Jack Daniels", img: "img/l24.png", category: "food", categories: ["food"], desc: "Amerikai whiskey márka." },
+        { id: 25, name: "OMV", img: "img/l25.png", category: "auto", categories: ["auto"], desc: "Osztrák olaj- és gázipari vállalat." },
+        { id: 26, name: "MOL", img: "img/l26.png", category: "auto", categories: ["auto"], desc: "Magyar olaj- és gázipari vállalat." },
+        { id: 27, name: "Shell", img: "img/l27.png", category: "auto", categories: ["auto"], desc: "Globális energiavállalat." },
+        { id: 28, name: "Turkish Airlines", img: "img/l28.png", category: "auto", categories: ["auto"], desc: "Török nemzeti légitársaság." },
+        { id: 29, name: "Petronas", img: "img/l29.png", category: "auto", categories: ["auto"], desc: "Malajziai olajvállalat." },
+        { id: 30, name: "Michelin", img: "img/l30.png", category: "auto", categories: ["auto"], desc: "Francia gumiabroncs-gyártó." },
+        { id: 31, name: "Bridgestone", img: "img/l31.png", category: "auto", categories: ["auto"], desc: "Japán gumiabroncs-gyártó." },
+        { id: 32, name: "Nestlé", img: "img/l32.png", category: "food", categories: ["food"], desc: "Svájci élelmiszeripari vállalat." },
+        { id: 33, name: "TikTok", img: "img/l33.png", category: "social", categories: ["social"], desc: "Kínai közösségi média." },
+        { id: 34, name: "Facebook", img: "img/l34.png", category: "social", categories: ["social"], desc: "Meta Platforms hálózata." },
+        { id: 35, name: "Hugo Boss", img: "img/l35.png", category: "fashion", categories: ["fashion"], desc: "Német divatmárka." },
+        { id: 36, name: "Louis Vuitton", img: "img/l36.png", category: "fashion", categories: ["fashion"], desc: "Francia luxus divatmárka." },
+        { id: 37, name: "Ralph Lauren", img: "img/l37.png", category: "fashion", categories: ["fashion"], desc: "Amerikai divatmárka." },
+        { id: 38, name: "Xbox", img: "img/l38.png", category: "tech", categories: ["tech"], desc: "Microsoft konzol." },
+        { id: 39, name: "PlayStation", img: "img/l39.png", category: "tech", categories: ["tech"], desc: "Sony konzol." },
+        { id: 40, name: "Nvidia", img: "img/l40.png", category: "tech", categories: ["tech"], desc: "GPU gyártó." },
+        { id: 41, name: "Intel", img: "img/l41.png", category: "tech", categories: ["tech"], desc: "Félvezetőgyártó." },
+        { id: 42, name: "AMD", img: "img/l42.png", category: "tech", categories: ["tech"], desc: "CPU/GPU gyártó." },
+        { id: 43, name: "Razer", img: "img/l43.png", category: "tech", categories: ["tech"], desc: "Gamer perifériák." },
+        { id: 44, name: "Suzuki", img: "img/l44.png", category: "auto", categories: ["auto"], desc: "Japán autógyártó." },
+        { id: 45, name: "Burger King", img: "img/l45.png", category: "food", categories: ["food"], desc: "Gyorsétteremlánc." },
+        { id: 46, name: "Toyota", img: "img/l46.png", category: "auto", categories: ["auto"], desc: "Japán autógyártó." },
+        { id: 47, name: "VW", img: "img/l47.png", category: "auto", categories: ["auto"], desc: "Német autógyártó." },
+        { id: 48, name: "OTP", img: "img/l48.png", category: "tech", categories: ["tech"], desc: "Bankcsoport." },
+        { id: 49, name: "Raiffeisen", img: "img/l49.png", category: "tech", categories: ["tech"], desc: "Bankcsoport." },
+        { id: 50, name: "Erste", img: "img/l50.png", category: "tech", categories: ["tech"], desc: "Bankcsoport." },
+        { id: 51, name: "YouTube", img: "img/l51.png", category: "social", categories: ["social"], desc: "Videómegosztó." },
+        { id: 52, name: "BMW", img: "img/l52.png", category: "auto", categories: ["auto"], desc: "Prémium autógyártó." },
+        { id: 53, name: "Rolls-Royce", img: "img/l53.png", category: "auto", categories: ["auto"], desc: "Luxusautógyártó." },
+        { id: 54, name: "Netflix", img: "img/l54.png", category: "social", categories: ["social"], desc: "Streaming szolgáltató." },
+        { id: 55, name: "Walt Disney", img: "img/l55.png", category: "social", categories: ["social"], desc: "Szórakoztatóipar." },
+        { id: 56, name: "SAP", img: "img/l56.png", category: "tech", categories: ["tech"], desc: "Szoftvervállalat." },
+        { id: 57, name: "Visa", img: "img/l57.png", category: "tech", categories: ["tech"], desc: "Pénzügyi szolgáltató." },
+        { id: 58, name: "MasterCard", img: "img/l58.png", category: "tech", categories: ["tech"], desc: "Pénzügyi szolgáltató." },
+        { id: 59, name: "Cisco", img: "img/l59.png", category: "tech", categories: ["tech"], desc: "Hálózati berendezések." },
+        { id: 60, name: "Caterpillar", img: "img/l60.png", category: "auto", categories: ["auto"], desc: "Nehézgépek." },
+        { id: 61, name: "Bosch", img: "img/l61.png", category: "tech", categories: ["tech"], desc: "Ipari technológiák." },
+        { id: 62, name: "Liebherr", img: "img/l62.png", category: "auto", categories: ["auto"], desc: "Ipari gépek." },
+        { id: 63, name: "L'Oréal", img: "img/l63.png", category: "fashion", categories: ["fashion"], desc: "Kozmetikai óriás." },
+        { id: 64, name: "Airbus", img: "img/l64.png", category: "auto", categories: ["auto"], desc: "Repülőgépgyártó." },
+        { id: 65, name: "HSBC", img: "img/l65.png", category: "tech", categories: ["tech"], desc: "Multinacionális bank." },
+        { id: 66, name: "Rolex", img: "img/l66.png", category: "fashion", categories: ["fashion"], desc: "Luxusóra márka." },
+        { id: 67, name: "Hublot", img: "img/l67.png", category: "fashion", categories: ["fashion"], desc: "Luxusóra márka." },
+        { id: 68, name: "Omega", img: "img/l68.png", category: "fashion", categories: ["fashion"], desc: "Óragyártó." },
+        { id: 69, name: "Breitling", img: "img/l69.png", category: "fashion", categories: ["fashion"], desc: "Óragyártó." },
+        { id: 70, name: "Patek Philippe", img: "img/l70.png", category: "fashion", categories: ["fashion"], desc: "Luxusóra márka." },
+        { id: 71, name: "Tag Heuer", img: "img/l71.png", category: "fashion", categories: ["fashion"], desc: "Óragyártó." },
+        { id: 72, name: "Prada", img: "img/l72.png", category: "fashion", categories: ["fashion"], desc: "Luxus divatmárka." },
+        { id: 73, name: "Armani", img: "img/l73.png", category: "fashion", categories: ["fashion"], desc: "Divatmárka." },
+        { id: 74, name: "Porsche", img: "img/l74.png", category: "auto", categories: ["auto"], desc: "Sportautógyártó." },
+        { id: 75, name: "Bentley", img: "img/l75.png", category: "auto", categories: ["auto"], desc: "Luxusautógyártó." },
+        { id: 76, name: "Gucci", img: "img/l76.png", category: "fashion", categories: ["fashion"], desc: "Luxus divatmárka." },
+        { id: 77, name: "Dior", img: "img/l77.png", category: "fashion", categories: ["fashion"], desc: "Luxus divatmárka." },
+        { id: 78, name: "Versace", img: "img/l78.png", category: "fashion", categories: ["fashion"], desc: "Divatmárka." }
     ];
 
     const META = {
@@ -296,6 +238,7 @@ window.onload = () => {
         if (it.id in META.newDaysAgo) it.addedAt = Date.now() - META.newDaysAgo[it.id] * DAY;
         it.baseOpens = META.baseOpens[it.id] || 0;
         if (!it.categories) it.categories = [it.category];
+        it.paused = false;
     });
 
     // TÁROLÁS
@@ -307,16 +250,20 @@ window.onload = () => {
     const opens = LS.get('bu_opens', {});
     const ratings = LS.get('bu_ratings', {}); 
 
-    companies.forEach(c => items.push({
-        id: c.id, name: c.name, img: c.logo, category: c.category || (c.categories && c.categories[0]), categories: c.categories || [c.category], desc: c.desc,
-        website: c.website, addedAt: c.addedAt, baseOpens: 0, premium: false, registered: true
-    }));
+    companies.forEach(c => {
+        if (!c.paused) {
+            items.push({
+                id: c.id, name: c.name, img: c.logo, category: c.category || (c.categories && c.categories[0]), categories: c.categories || [c.category], desc: c.desc,
+                website: c.website, addedAt: c.addedAt, baseOpens: 0, premium: false, registered: true, paused: !!c.paused
+            });
+        }
+    });
 
     // SEGÉDEK
     const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const isNew = (it) => !!it.addedAt && (Date.now() - it.addedAt) < NEW_DAYS * DAY;
     const totalOpens = (it) => (it.baseOpens || 0) + (opens[it.id] || 0);
-    const topItems = (n) => [...items].sort((a, b) => totalOpens(b) - totalOpens(a)).slice(0, n);
+    const topItems = (n) => [...items].filter(i => !i.paused).sort((a, b) => totalOpens(b) - totalOpens(a)).slice(0, n);
     const safeUrl = (u) => {
         if (!u) return '';
         try {
@@ -325,25 +272,17 @@ window.onload = () => {
         } catch (e) { return ''; }
     };
     const placeholder = (n) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70"><rect width="70" height="70" rx="14" fill="#383838"/><text x="35" y="46" font-size="32" text-anchor="middle" fill="#4fc3f7" font-family="sans-serif">' + (String(n || '?').trim().charAt(0).toUpperCase()).replace(/[<>&"']/g, '?') + '</text></svg>'
-);
+        `<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70"><rect width="70" height="70" rx="14" fill="#383838"/><text x="35" y="46" font-size="32" text-anchor="middle" fill="#4fc3f7" font-family="sans-serif">${(String(n || '?').trim().charAt(0).toUpperCase()).replace(/[<>&"']/g, '?')}</text></svg>`);
+    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 
-const el = (tag, cls, text) => { 
-    const e = document.createElement(tag); 
-    if (cls) e.className = cls; 
-    if (text != null) e.textContent = text; 
-    return e; 
-};
+    let toastTimer;
+    function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('active');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('active'), 5000);
+    }
 
-let toastTimer;
-function showToast(msg) {
-    toastEl.textContent = msg;
-    toastEl.classList.add('active');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toastEl.classList.remove('active'), 5000);
-}
-
-    // Mobil keresés legördülő panel nyitás-zárás
     searchToggleBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         searchWrapper.classList.toggle('dropdown-open');
@@ -433,7 +372,6 @@ function showToast(msg) {
         });
     }
 
-    // 2. pont: Biztosítja, hogy szűrt tartalomnál a logók soha ne fedjék egymást, hanem fix cellákban legyenek rendezve
     function calculateCenteredGrid(cards) {
         const W = window.innerWidth, gap = 14;
         const maxSize = Math.max(...cards.map(c => c.size));
@@ -450,6 +388,7 @@ function showToast(msg) {
     }
 
     function createCard(item, spawn) {
+        if (item.paused) return null;
         const card = el('div', 'card' + (item.premium ? ' premium' : ''));
         const img = new Image();
         img.src = item.img; img.alt = item.name;
@@ -547,6 +486,13 @@ function showToast(msg) {
         const isFiltering = filterState.tokens.length > 0 || filterState.activeCategory !== null || filterState.special !== null;
 
         cardElements.forEach(item => {
+            if (item.originalData.paused) {
+                item.element.style.display = 'none';
+                return;
+            } else {
+                item.element.style.display = 'flex';
+            }
+
             const hidden = item.element.classList.contains('filtered-out');
             if (isFiltering && item.targetX !== undefined) {
                 item.pixelX += (item.targetX - item.pixelX) * 0.15;
@@ -584,6 +530,10 @@ function showToast(msg) {
 
         cardElements.forEach(item => {
             const o = item.originalData;
+            if (o.paused) {
+                item.element.classList.add('filtered-out');
+                return;
+            }
             const matchesToken = tokens.every(t => item.hay.includes(t));
             const matchesCat = (cat === null || (o.categories && o.categories.includes(cat)) || o.category === cat);
             const matchesSpecial = (
@@ -610,10 +560,12 @@ function showToast(msg) {
             calculateCenteredGrid(matching);
         } else if (!isAnyFilterActive) {
             cardElements.forEach(i => { 
-                i.targetX = undefined; 
-                i.targetY = undefined;
-                i.vx = ((Math.random() - 0.5) * maxSpeed * 2);
-                i.vy = ((Math.random() - 0.5) * maxSpeed * 2);
+                if (!i.originalData.paused) {
+                    i.targetX = undefined; 
+                    i.targetY = undefined;
+                    i.vx = ((Math.random() - 0.5) * maxSpeed * 2);
+                    i.vy = ((Math.random() - 0.5) * maxSpeed * 2);
+                }
             });
         }
 
@@ -663,8 +615,8 @@ function showToast(msg) {
     function renderDiscover() {
         let list = [];
         if (activeTab === 'popular') list = topItems(10);
-        else if (activeTab === 'new') list = items.filter(isNew).sort((a, b) => b.addedAt - a.addedAt);
-        else list = items.filter(i => i.premium);
+        else if (activeTab === 'new') list = items.filter(i => !i.paused && isNew(i)).sort((a, b) => b.addedAt - a.addedAt);
+        else list = items.filter(i => !i.paused && i.premium);
 
         dList.replaceChildren();
         if (!list.length) dList.appendChild(el('span', 'dempty', 'Még nincs ilyen cég'));
@@ -693,7 +645,7 @@ function showToast(msg) {
 
     function shuffleCards() {
         cardElements.forEach(item => {
-            if (!item.element.classList.contains('filtered-out')) {
+            if (!item.originalData.paused && !item.element.classList.contains('filtered-out')) {
                 item.pixelX = cachedBounds.minX + Math.random() * (cachedBounds.maxX - item.size + cardSize - cachedBounds.minX);
                 item.pixelY = cachedBounds.minY + Math.random() * (cachedBounds.maxY - item.size + cardSize - cachedBounds.minY);
                 item.vx = ((Math.random() - 0.5) * maxSpeed * 2);
@@ -802,7 +754,7 @@ function showToast(msg) {
         container.style.pointerEvents = navLinks.classList.contains('active') ? 'none' : 'all';
     });
 
-    // REGISZTRÁCIÓ / BELÉPÉS
+    // REGISZTRÁCIÓ / BELÉPÉS / PROFILKEZELÉS
     const authModal = $('authModal'), authBtn = $('authBtn'), authLabel =$('authLabel');
     const authTabs = $('authTabs'), authTitle =$('authTitle');
     const registerForm = $('registerForm'), loginForm = $('loginForm'), accountView =$('accountView');
@@ -814,7 +766,6 @@ function showToast(msg) {
     let pendingLogo = null;
     let selectedCategories = [];
 
-    // Kategória chipek generálása a regisztrációhoz (6. pont: max 3 kategória)
     Object.entries(categoryNames).forEach(([k, v]) => {
         const btn = el('button', 'reg-cat-chip', v);
         btn.type = 'button';
@@ -843,7 +794,6 @@ function showToast(msg) {
         });
     });
 
-    // Drag and Drop logó feltöltés kezelése (5. pont)
     const fileDropzone = $('fileDropzone');
     const dropzoneContent = $('dropzoneContent');
 
@@ -912,7 +862,7 @@ function showToast(msg) {
         accountView.hidden = v !== 'account';
         authTabs.hidden = v === 'account';
         authTabs.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.tab === v));
-        authTitle.textContent = v === 'account' ? 'Fiókom' : (v === 'login' ? 'Üdv újra!' : 'Csatlakozz a Brand Univerzumhoz');
+        authTitle.textContent = v === 'account' ? 'Fiókom és Profilkezelés' : (v === 'login' ? 'Üdv újra!' : 'Csatlakozz a Brand Univerzumhoz');
         if (v === 'account') renderAccount();
     }
     function openAuth(v) {
@@ -969,14 +919,14 @@ function showToast(msg) {
             ok = setErr(f, 'regSite', siteRaw && !site ? 'Érvénytelen weboldal link.' : '') && ok;
             if (!ok) return;
 
-            company = { id: Date.now(), name, email, pass: await hash(pass), logo: pendingLogo, desc, categories: [...selectedCategories], category: selectedCategories[0], website: site, addedAt: Date.now(), type: 'company' };
+            company = { id: Date.now(), name, email, pass: await hash(pass), logo: pendingLogo, desc, categories: [...selectedCategories], category: selectedCategories[0], website: site, addedAt: Date.now(), type: 'company', paused: false };
             companies.push(company);
             if (!LS.set('bu_companies', companies)) {
                 companies.pop();
                 setErr(f, 'regLogo', 'Nem sikerült menteni (a tárhely megtelt).');
                 return;
             }
-            item = { id: company.id, name, img: company.logo, category: company.category, categories: company.categories, desc, website: site, addedAt: company.addedAt, baseOpens: 0, premium: false, registered: true };
+            item = { id: company.id, name, img: company.logo, category: company.category, categories: company.categories, desc, website: site, addedAt: company.addedAt, baseOpens: 0, premium: false, registered: true, paused: false };
             items.push(item);
             createCard(item, true);
         } else {
@@ -1009,6 +959,7 @@ function showToast(msg) {
         showToast('👋 Üdv újra, ' + c.name + '!');
     });
 
+    // Fiók és Profilkezelő nézet generálása (Szerkesztés, Szüneteltetés, Törlés, Statisztika)
     function renderAccount() {
         const c = currentCompany();
         accountView.replaceChildren();
@@ -1022,7 +973,7 @@ function showToast(msg) {
             const im = new Image(); im.src = c.logo; im.alt = '';
             head.append(im);
             const cats = c.categories || [c.category];
-            box.append(el('h4', null, c.name), el('p', null, cats.map(cat => categoryNames[cat] || cat).join(', ') || 'Cég'), el('p', null, c.email));
+            box.append(el('h4', null, c.name), el('p', null, cats.map(cat => categoryNames[cat] || cat).join(', ') + (c.paused ? ' (Szüneteltetve)' : '')), el('p', null, c.email));
         } else {
             box.append(el('h4', null, c.name), el('p', null, 'Vendég fiók (Értékelő)'), el('p', null, c.email));
         }
@@ -1030,18 +981,120 @@ function showToast(msg) {
         accountView.append(head);
 
         if (isComp) {
-            const it = items.find(i => i.id === c.id);
-            const left = Math.max(0, Math.ceil((NEW_DAYS * DAY - (Date.now() - c.addedAt)) / DAY));
-            accountView.append(
-                el('p', 'acc-stat', (left > 0 ? `🆕 Az ÚJ jelvényed még ${left} napig látszik.` : 'Az ÚJ jelvényed lejárt.') + '  👁 ' + (it ? totalOpens(it) : 0) + ' megnyitás'),
-                el('div', 'acc-premium', '👑 Prémium csomag – hamarosan!')
-            );
-            const open = el('button', 'btn-primary', 'Kártyám megnyitása'); open.type = 'button';
+            const it = items.find(i => i.id === c.id) || { id: c.id };
+            const opensCount = totalOpens(it);
+            const itemRating = ratings[c.id] || { totalScore: 0, count: 0 };
+            const avgRating = itemRating.count > 0 ? (itemRating.totalScore / itemRating.count).toFixed(1) : 'Még nincs értékelés';
+
+            // Statisztika doboz
+            const statBox = el('div', 'acc-stats-box');
+            statBox.innerHTML = `
+                <div class="stat-item"><strong>👁 Megtekintések:</strong> <span>${opensCount}</span></div>
+                <div class="stat-item"><strong>⭐ Átlagos értékelés:</strong> <span>${avgRating} / 5 (${itemRating.count} db)</span></div>
+            `;
+            accountView.append(statBox);
+
+            // Profil szerkesztő form
+            const editForm = el('form', 'edit-profile-form');
+            editForm.innerHTML = `
+                <h4 style="color:#4fc3f7; margin:15px 0 10px;">Profil szerkesztése</h4>
+                <div class="field"><label>Cégnév</label><input type="text" id="editName" value="${c.name}" required></div>
+                <div class="field"><label>Rövid leírás (max 300 karakter)</label><textarea id="editDesc" rows="3" maxlength="300">${c.desc || ''}</textarea></div>
+                <div class="field"><label>Weboldal link</label><input type="text" id="editSite" value="${c.website || ''}"></div>
+                <div class="field"><label>Új logó feltöltése (opcionális)</label><input type="file" id="editLogo" accept="image/*"></div>
+                <button type="submit" class="btn-primary" style="margin-top:5px;">Változtatások mentése</button>
+            `;
+
+            editForm.onsubmit = async (e) => {
+                e.preventDefault();
+                const newName = $('editName').value.trim();
+                const newDesc = $('editDesc').value.trim();
+                const newSite = safeUrl($('editSite').value.trim());
+                const logoFile = $('editLogo').files[0];
+
+                if (!newName) { showToast('⚠️ A cégnév nem lehet üres!'); return; }
+
+                c.name = newName;
+                c.desc = newDesc;
+                c.website = newSite;
+
+                const updateItemInScene = () => {
+                    const sceneItem = items.find(i => i.id === c.id);
+                    if (sceneItem) {
+                        sceneItem.name = c.name;
+                        sceneItem.desc = c.desc;
+                        sceneItem.website = c.website;
+                        sceneItem.img = c.logo;
+                    }
+                    LS.set('bu_companies', companies);
+                    showToast('✅ Profil sikeresen frissítve!');
+                    renderAccount();
+                    renderDiscover();
+                };
+
+                if (logoFile) {
+                    if (logoFile.size > 5 * 1024 * 1024) { showToast('⚠️ A kép mérete túl nagy (max 5MB).'); return; }
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const S = 256, cv = document.createElement('canvas');
+                            cv.width = cv.height = S;
+                            const r = Math.min(S / img.width, S / img.height), w = img.width * r, h = img.height * r;
+                            cv.getContext('2d').drawImage(img, (S - w) / 2, (S - h) / 2, w, h);
+                            c.logo = cv.toDataURL('image/png');
+                            updateItemInScene();
+                        };
+                        img.src = ev.target.result;
+                    };
+                    reader.readAsDataURL(logoFile);
+                } else {
+                    updateItemInScene();
+                }
+            };
+            accountView.append(editForm);
+
+            // Szüneteltetés / Aktiválás gomb
+            const pauseBtn = el('button', 'btn-ghost', c.paused ? 'Profil aktiválása' : 'Profil szüneteltetése');
+            pauseBtn.type = 'button';
+            pauseBtn.onclick = () => {
+                c.paused = !c.paused;
+                LS.set('bu_companies', companies);
+                const sceneItem = items.find(i => i.id === c.id);
+                if (sceneItem) sceneItem.paused = c.paused;
+                showToast(c.paused ? '⏸ Profil szüneteltetve (rejtve).' : '▶ Profil aktiválva.');
+                renderAccount();
+                renderDiscover();
+            };
+            accountView.append(pauseBtn);
+
+            const open = el('button', 'btn-ghost', 'Kártyám megnyitása'); open.type = 'button';
             open.onclick = () => { closeAuth(); if (it) openModal(it); };
             accountView.append(open);
         } else {
             accountView.append(el('p', 'acc-stat', 'Vendégként szabadon értékelheted a logókat az 1-5 skálás dollár csillagokkal.'));
         }
+
+        // Fiók törlése gomb
+        const deleteBtn = el('button', 'btn-danger', 'Fiók végleges törlése');
+        deleteBtn.type = 'button';
+        deleteBtn.onclick = () => {
+            if (confirm('Biztosan törölni szeretnéd a fiókodat? Ez a művelet végleges és nem vonható vissza!')) {
+                const idx = companies.findIndex(x => x.email === c.email);
+                if (idx > -1) companies.splice(idx, 1);
+                LS.set('bu_companies', companies);
+                LS.set('bu_session', null);
+                
+                const itemIdx = items.findIndex(i => i.id === c.id);
+                if (itemIdx > -1) items.splice(itemIdx, 1);
+
+                closeAuth();
+                updateAuthUI();
+                renderDiscover();
+                showToast('🗑 Fiók sikeresen törölve.');
+            }
+        };
+        accountView.append(deleteBtn);
 
         const out = el('button', 'btn-ghost', 'Kilépés'); out.type = 'button';
         out.onclick = () => { LS.set('bu_session', null); closeAuth(); updateAuthUI(); showToast('Sikeres kilépés.'); };
