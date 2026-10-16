@@ -6,12 +6,12 @@ body {
     background-color: #121212;
     color: #e0e0e0;
     overflow-x: hidden;
-    /* 5. pont: Mobil eszközön a fentrol lehúzásos oldalfrissítés megakadályozása */
     overscroll-behavior-y: none;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* --------------------------------------
- * HEADER ÉS NAVIGÁCIÓ
+ * HEADER ÉS NAVIGÁCIÓ (4. pont: sorrend & elrendezés)
  * -------------------------------------- */
 
 header {
@@ -33,30 +33,37 @@ header {
     height: 100%;
     width: 100%;
     box-sizing: border-box;
+    gap: 15px;
 }
 
+/* Bal oldalon: logó és név */
 .header-left {
-    flex: 1;
     display: flex;
     align-items: center;
+    flex-shrink: 0;
 }
 
+/* Középen: keresés és szűrő gomb */
 .header-center {
-    flex: 2;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex: 1;
+    max-width: 550px;
+    gap: 10px;
 }
 
+/* Jobb oldalon: bejelentkezés ikon és hamburger menü */
 .header-right {
-    flex: 1;
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    gap: 12px;
+    flex-shrink: 0;
 }
 
 .logo-placeholder {
-    font-size: 1.6em;
+    font-size: 1.5em;
     font-weight: 700;
     color: #4fc3f7;
     letter-spacing: 1px;
@@ -65,13 +72,36 @@ header {
 
 .logo-short { display: none; }
 
+/* 1. pont: Keresés mező optimális méretezése kis képernyőn is */
 .search-wrapper {
     position: relative; 
     width: 100%;
-    max-width: 450px;
     display: flex;
     align-items: center;
-    gap: 10px;
+}
+
+.search-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: #e0e0e0;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: #2c2c2c;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.search-toggle-btn:hover {
+    color: #4fc3f7;
+    background-color: #383838;
+}
+
+.search-dropdown-panel {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative;
 }
 
 #searchInput {
@@ -85,6 +115,7 @@ header {
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
     padding-right: 40px; 
+    font-size: 0.95rem;
 }
 
 #searchInput:focus {
@@ -96,19 +127,18 @@ header {
 .clear-search-btn {
     position: absolute;
     top: 50%;
-    right: 60px; 
+    right: 12px; 
     transform: translateY(-50%);
     background: none;
     border: none;
     color: #e0e0e0;
-    font-size: 1.2em;
+    font-size: 1.1em;
     font-weight: bold;
     cursor: pointer;
-    padding: 5px;
+    padding: 2px 6px;
     opacity: 0.7;
     transition: opacity 0.2s, color 0.2s;
     display: none;
-    line-height: 1;
     z-index: 2;
 }
 
@@ -121,8 +151,8 @@ header {
     background-color: #2c2c2c;
     border: none;
     border-radius: 8px;
-    width: 42px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -182,7 +212,6 @@ nav ul li a:hover {
     color: #121212;
 }
 
-.mobile-discover-section { display: none; }
 .mobile-menu-footer { display: none; }
 
 /* Hamburger menü */
@@ -216,11 +245,11 @@ nav ul li a:hover {
 .scene-container {
     position: relative;
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
     padding-top: 70px; 
-    perspective: none; 
     box-sizing: border-box;
-    overflow: hidden; 
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .card {
@@ -272,7 +301,7 @@ nav ul li a:hover {
 .card.filtered-out { opacity: 0; pointer-events: none; }
 
 /* --------------------------------------
- * MODALOK ÉS ÉRTÉKELÉSI RENDSZER (3. pont)
+ * MODALOK ÉS MODERNIZÁLT FORMOK (5. és 6. pont)
  * -------------------------------------- */
 
 .modal {
@@ -341,7 +370,6 @@ nav ul li a:hover {
     border: 1px solid rgba(79, 195, 247, 0.3);
 }
 
-/* --- Értékelési szekció dizájn (3. pont) --- */
 .rating-section {
     background: rgba(255, 213, 79, 0.05);
     border: 1px solid rgba(255, 213, 79, 0.2);
@@ -385,7 +413,6 @@ nav ul li a:hover {
     text-align: center;
 }
 
-/* Részecske effektus (3. pont) */
 .rating-particle {
     position: fixed;
     width: 6px;
@@ -471,18 +498,18 @@ nav ul li a:hover {
 }
 
 .filter-content {
-    background-color: #1e1e1e;
-    padding: 30px;
-    border-radius: 15px;
+    background: linear-gradient(145deg, #222222, #181818);
+    padding: 35px;
+    border-radius: 20px;
     width: 90%;
-    max-width: 400px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-    border: 1px solid #333;
+    max-width: 440px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.08);
     animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes popIn {
-    from { transform: scale(0.8); opacity: 0; }
+    from { transform: scale(0.85); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
 
@@ -490,21 +517,23 @@ nav ul li a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #333;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
     padding-bottom: 15px;
 }
 
 .filter-header h3 {
     margin: 0;
     color: #4fc3f7;
+    font-size: 1.25rem;
 }
 
 .close-filter-btn {
-    font-size: 24px;
+    font-size: 26px;
     cursor: pointer;
     color: #888;
     line-height: 1;
+    transition: color 0.2s;
 }
 
 .close-filter-btn:hover { color: #fff; }
@@ -638,7 +667,6 @@ nav ul li a:hover {
 .card.premium img { max-width: 88px; max-height: 88px; }
 .card.premium h3 { color: #ffe082; font-size: 0.9em; }
 .card.premium:hover, .card.premium.dragging { box-shadow: 0 0 36px rgba(255, 193, 7, 0.85), 0 0 15px rgba(255, 255, 255, 0.3); }
-.card.premium-bg { opacity: 0.45; }
 .badge-crown { position: absolute; top: -12px; left: -6px; font-size: 1.3rem; pointer-events: none; filter: drop-shadow(0 2px 3px #000); }
 
 /* --- ÚJ jelvény --- */
@@ -703,17 +731,17 @@ nav ul li a:hover {
 .confetti { position: fixed; width: 8px; height: 12px; z-index: 30002; pointer-events: none; animation: confFly 1.5s ease-out forwards; }
 @keyframes confFly { to { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); opacity: 0; } }
 
-/* --- Belépés gomb a fejlécben --- */
+/* Fiók / Belépés gomb dizájn */
 .auth-btn {
     background: rgba(79, 195, 247, .12); border: 1px solid rgba(79, 195, 247, .5); color: #4fc3f7;
-    border-radius: 8px; padding: 8px 14px; margin-right: 12px; cursor: pointer; font-family: inherit;
+    border-radius: 8px; padding: 8px 12px; cursor: pointer; font-family: inherit;
     font-weight: 600; font-size: .9rem; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all .2s;
 }
 .auth-btn:hover { background: #4fc3f7; color: #121212; }
 .auth-btn.logged { background: rgba(67, 233, 123, .12); border-color: rgba(67, 233, 123, .6); color: #43e97b; }
-.auth-label { max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
+.auth-label { max-width: 130px; overflow: hidden; text-overflow: ellipsis; display: none; }
+.auth-btn.logged .auth-label { display: inline; }
 
-/* --- Modal kiegészítők --- */
 .modal-badges { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 12px; }
 .modal-badges:empty { display: none; }
 .mbadge { font-size: .8rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
@@ -726,31 +754,100 @@ nav ul li a:hover {
     background: #4fc3f7; color: #121212; font-weight: 700; text-decoration: none; transition: box-shadow .3s;
 }
 .site-btn:hover { box-shadow: 0 0 15px rgba(79, 195, 247, .6); }
-.filter-subtitle { margin: 14px 0 10px; }
 
-/* --- Regisztrációs ablak (4. pont) --- */
+/* --- Modernizált regisztrációs elemek (5. és 6. pont) --- */
 .auth-modal { align-items: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 0; box-sizing: border-box; }
 .auth-content { max-width: 460px; margin: auto; box-sizing: border-box; }
 .auth-tabs { display: flex; gap: 6px; margin: 14px 0 18px; background: #2a2a2a; padding: 4px; border-radius: 10px; }
 .auth-tabs button { flex: 1; background: none; border: none; color: #aaa; padding: 9px; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: inherit; font-size: .95rem; }
 .auth-tabs button.active { background: #4fc3f7; color: #121212; }
+
 .field { margin-bottom: 14px; }
 .field label { display: flex; justify-content: space-between; gap: 8px; font-size: .88rem; color: #ccc; margin-bottom: 6px; font-weight: 600; }
 .hint, .counter { font-weight: 400; color: #888; font-size: .8rem; }
-.field input, .field select, .field textarea {
+
+.field input[type="text"], .field input[type="email"], .field input[type="password"], .field textarea {
     width: 100%; box-sizing: border-box; background: #2c2c2c; color: #e0e0e0;
     border: 1px solid #3d3d3d; border-radius: 8px; padding: 10px 12px; font-size: 16px; font-family: inherit;
 }
 .field textarea { resize: vertical; min-height: 80px; }
-.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #4fc3f7; box-shadow: 0 0 0 2px rgba(79, 195, 247, .3); }
-.field input[type=file] { padding: 8px; font-size: .9rem; }
-.reg-type-selector { display: flex; gap: 15px; margin-top: 5px; }
-.radio-label { font-weight: 400 !important; font-size: 0.9rem !important; cursor: pointer; display: flex; align-items: center; gap: 6px; color: #ddd; }
-.err { display: block; color: #ff7a7a; font-size: .8rem; min-height: 0; margin-top: 4px; }
+.field input:focus, .field textarea:focus { outline: none; border-color: #4fc3f7; box-shadow: 0 0 0 2px rgba(79, 195, 247, .3); }
+
+/* Modern Rádiógombok cég/vendég választáshoz */
+.reg-type-selector { display: flex; gap: 10px; margin-top: 5px; }
+.radio-card {
+    flex: 1;
+    background: #252525;
+    border: 1px solid #383838;
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.radio-card:hover { border-color: #555; background: #2c2c2c; }
+.radio-card input[type="radio"] { display: none; }
+.radio-card-content { font-size: 0.85rem; font-weight: 600; color: #bbb; }
+.radio-card input[type="radio"]:checked + .radio-card-content { color: #4fc3f7; }
+.radio-card:has(input[type="radio"]:checked) {
+    border-color: #4fc3f7;
+    background: rgba(79, 195, 247, 0.1);
+}
+
+/* Drag and Drop zóna */
+.file-dropzone {
+    border: 2px dashed #444;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    background: #252525;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.file-dropzone:hover, .file-dropzone.dragover {
+    border-color: #4fc3f7;
+    background: rgba(79, 195, 247, 0.05);
+}
+.file-input-hidden { display: none; }
+.dropzone-content { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.dropzone-icon { font-size: 1.8rem; }
+.dropzone-text { font-size: 0.85rem; color: #aaa; }
+
+/* Több kategória választó chipek (max 3) */
+.category-select-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+.reg-cat-chip {
+    background: #252525;
+    border: 1px solid #3d3d3d;
+    color: #bbb;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+.reg-cat-chip:hover { border-color: #666; color: #fff; }
+.reg-cat-chip.active {
+    background: #4fc3f7;
+    color: #121212;
+    border-color: #4fc3f7;
+    font-weight: 600;
+}
+
+.err { display: block; color: #ff7a7a; font-size: .8rem; margin-top: 4px; }
 .err:empty { display: none; }
-.preview-wrap { text-align: center; margin: 0 0 18px; padding: 18px 0 8px; border: 1px dashed #3d3d3d; border-radius: 12px; animation: popIn .4s cubic-bezier(.175, .885, .32, 1.275); }
+.preview-wrap { text-align: center; margin: 0 0 18px; padding: 18px 0 8px; border: 1px dashed #3d3d3d; border-radius: 12px; }
 .preview-wrap .hint { margin: 0 0 16px; }
 .card.static { position: relative; margin: 0 auto 10px; transform: none; cursor: default; box-shadow: 0 0 25px rgba(67, 233, 123, .45); }
+
 .btn-primary {
     width: 100%; background: #4fc3f7; color: #121212; border: none; border-radius: 10px;
     padding: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: box-shadow .3s;
@@ -758,6 +855,7 @@ nav ul li a:hover {
 .btn-primary:hover { box-shadow: 0 0 18px rgba(79, 195, 247, .6); }
 .btn-ghost { width: 100%; background: none; border: 1px solid #555; color: #ccc; border-radius: 10px; padding: 11px; margin-top: 10px; cursor: pointer; font-family: inherit; font-size: .95rem; }
 .btn-ghost:hover { border-color: #ff7a7a; color: #ff7a7a; }
+
 .acc-head { display: flex; align-items: center; gap: 14px; margin: 16px 0; }
 .acc-head img { width: 64px; height: 64px; object-fit: contain; background: #2c2c2c; border-radius: 12px; padding: 6px; }
 .acc-head h4 { margin: 0 0 4px; color: #4fc3f7; font-size: 1.15rem; }
@@ -765,16 +863,40 @@ nav ul li a:hover {
 .acc-stat { font-size: .9rem; color: #bbb; line-height: 1.5; }
 .acc-premium { background: rgba(255, 213, 79, .08); border: 1px dashed rgba(255, 213, 79, .5); color: #ffd54f; border-radius: 10px; padding: 12px; font-size: .88rem; margin: 14px 0 16px; line-height: 1.5; }
 
-/* --- Reszponzív (2. és 6. pont mobil menü integráció) --- */
+/* --- Reszponzív mobil nézet --- */
 @media (max-width: 768px) {
     .logo-full { display: none; }
     .logo-short { display: inline; }
-    .header-left, .header-right { flex: 0 0 auto; }
-    .header-center { flex: 1; padding: 0 10px; }
-    .hamburger { display: flex; }
     
-    /* Elrejtjük az asztali felfedező sávot mobilon, helyette a menübe tesszük */
     .discover-bar { display: none; }
+
+    .search-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+    }
+
+    .search-dropdown-panel {
+        display: none;
+        position: absolute;
+        top: 60px;
+        left: 15px;
+        right: 15px;
+        width: auto;
+        background-color: #1f1f1f;
+        padding: 12px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+        border: 1px solid rgba(79, 195, 247, 0.4);
+        z-index: 1000;
+        animation: popIn 0.2s ease-out;
+    }
+
+    .search-wrapper.dropdown-open .search-dropdown-panel {
+        display: flex;
+    }
 
     nav {
         display: flex;
@@ -794,66 +916,17 @@ nav ul li a:hover {
     }
 
     nav.active { height: calc(100vh - 70px); padding: 25px 20px; }
-    
-    .mobile-discover-section {
-        display: block;
-        margin-bottom: 20px;
-        border-bottom: 1px solid #333;
-        padding-bottom: 20px;
-    }
-    .mobile-menu-title {
-        color: #4fc3f7;
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin: 0 0 10px 0;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .mobile-dtabs {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-bottom: 12px;
-    }
-    .mobile-dtab {
-        width: 100%;
-        text-align: left;
-        padding: 10px 14px;
-        border-radius: 8px;
-    }
-    .mobile-dice-btn {
-        width: 100%;
-        background-color: #2c2c2c;
-        border: 1px solid #4fc3f7;
-        color: #4fc3f7;
-        padding: 10px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        font-family: inherit;
-    }
-
     nav ul { flex-direction: column; align-items: stretch; width: 100%; }
     nav ul li a { padding: 12px 14px; border-radius: 8px; margin-bottom: 6px; }
 
-    .mobile-menu-footer {
-        display: block;
-        padding: 15px 0 0 0;
-        text-align: center;
-        border-top: 1px solid rgba(79, 195, 247, 0.2);
-        margin-top: 20px;
-    }
-    .mobile-menu-footer p { font-size: 0.85em; font-style: italic; color: #4fc3f7; opacity: 0.8; }
-    
     .card { width: 90px; height: 90px; }
     .card.premium { width: 114px; height: 114px; }
     .card.premium img { max-width: 70px; max-height: 70px; }
     .card img { max-width: 55px; max-height: 55px; }
     .badge-crown { font-size: 1.1rem; }
     
-    .search-wrapper { max-width: 100%; }
     #searchInput { font-size: 16px; } 
-    .clear-search-btn { right: 55px; }
+    .clear-search-btn { right: 12px; }
     .modal-content { padding: 28px 20px; }
     .modal-content h2 { font-size: 1.7em; }
     .filter-content { padding: 22px 18px; }
@@ -861,7 +934,6 @@ nav ul li a:hover {
 }
 
 @media (max-width: 360px) {
-    .search-wrapper { gap: 6px; }
     .filter-toggle-btn { width: 38px; }
-    .nav-container { padding: 0 6px; }
+    .nav-container { padding: 0 10px; }
 }

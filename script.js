@@ -5,6 +5,9 @@ window.onload = () => {
     const $ = (id) => document.getElementById(id);
     const container = $('scene-container');
     const searchInput = $('searchInput');
+    const searchToggleBtn = $('searchToggleBtn');
+    const searchDropdownPanel = $('searchDropdownPanel');
+    const searchWrapper = $('searchWrapper');
     const modal = $('modal');
     const closeBtn = document.querySelector('.close-btn');
     const hamburgerBtn = $('hamburgerBtn');
@@ -36,16 +39,15 @@ window.onload = () => {
     // Felfedező sáv & Gyorsszűrők
     const discoverBar = $('discoverBar');
     const dList = $('discoverList');
-    const dTabs = document.querySelectorAll('.dtab'); // mind asztali és mobil fül
+    const dTabs = document.querySelectorAll('.dtab');
     const randomBtn = $('randomBtn');
-    const mobileRandomBtn = $('mobileRandomBtn');
     const resultInfo = $('resultInfo');
     const toastEl = $('toast');
 
     const WARNING_SEEN_KEY = 'mobileWarningSeen';
 
     // ----------------------------------------------------------------
-    // KONFIGURÁCIÓ ÉS VÁLTOZÓK
+    // KONFIGURÁCIÓ ÉS VÁLTOZÓk
     // ----------------------------------------------------------------
     let draggedItem = null;
     const dragDistanceThreshold = 5;
@@ -67,334 +69,11 @@ window.onload = () => {
     let navHeight = 70;
     let cachedBounds = { minX: 0, maxX: 0, minY: 0, maxY: 0 };
 
-    // Keresés és Szűrés állapot
     let filterState = {
         searchTerm: '',
         tokens: [],
         activeCategory: null, 
         special: null         
-    };
-
-    // ADATOK
-    const items = [
-        { 
-            id: 1, name: "Nike", img: "img/l1.png", category: "fashion",
-            desc: "A Nike Inc. egy amerikai multinacionális vállalat, amely cipők, ruházati cikkek, sportfelszerelések és kiegészítők tervezésével, fejlesztésével és gyártásával foglalkozik. Küldetésük az inspiráció és innováció eljuttatása minden sportolóhoz a világon." 
-        },
-        { 
-            id: 2, name: "McDonald's", img: "img/l2.png", category: "food",
-            desc: "A világ vezető gyorséttermi lánca, több mint 100 országban van jelen. Folyamatosan fejleszti éttermi élményét és globális ellátási láncát a fenntarthatóság jegyében." 
-        },
-        { 
-            id: 3, name: "Apple", img: "img/l3.png", category: "tech",
-            desc: "Az Apple Inc. technológiai vállalat, amely fogyasztói elektronikát, számítógépes szoftvereket és online szolgáltatásokat fejleszt. Innovációjuk kulcsa a felhasználói élmény tökéletesítése." 
-        },
-        { 
-            id: 4, name: "Mercedes-Benz", img: "img/l4.png", category: "auto",
-            desc: "A Mercedes-Benz német prémium autómárka, amely a luxus, a biztonság és a fejlett technológia szinonimája. Jelenleg nagy hangsúlyt fektetnek az elektromos járművek fejlesztésére." 
-        },
-        { 
-            id: 5, name: "Coca-Cola", img: "img/l5.png", category: "food",
-            desc: "A Coca-Cola Company a világ egyik legnagyobb italgyártója, termékeit több mint 200 országban értékesítik. Elkötelezettek a fenntartható csomagolási megoldások iránt." 
-        },
-        { 
-            id: 6, name: "Microsoft", img: "img/l6.png", category: "tech",
-            desc: "A Microsoft globális technológiai vállalat, amely szoftverek, fogyasztói elektronikai eszközök, személyi számítógépek és szolgáltatások fejlesztésével foglalkozik. Fő fókuszban a felhőszolgáltatások (Azure) állnak." 
-        },
-        { 
-            id: 7, name: "Amazon", img: "img/l7.png", category: "tech",
-            desc: "Az Amazon.com a világ egyik legnagyobb e-kereskedelmi vállalata és felhőszolgáltatója (AWS). Céljuk a vevőközpontúság, az innováció és az operatív kiválóság." 
-        },
-        { 
-            id: 8, name: "X", img: "img/l8.png", category: "social",
-            desc: "Az X (korábban Twitter) egy globális közösségi média platform, amely rövid üzenetek megosztására épül. Fontos szerepet játszik a valós idejű kommunikációban és hírek terjesztésében." 
-        },
-        { 
-            id: 9, name: "Ikea", img: "img/l9.png", category: "home",
-            desc: "Az IKEA svéd multinacionális vállalat, amely megfizethető és praktikus bútorokat, lakberendezési cikkeket és kiegészítőket kínál. Fenntarthatósági törekvéseik középpontjában az újrahasznosítás és a környezetbarát anyagok állnak." 
-        },
-        { 
-            id: 10, name: "Jysk", img: "img/l10.png", category: "home",
-            desc: "A JYSK dán kiskereskedelmi lánc, amely bútorokat, matracokat, lakberendezési cikkeket és háztartási kiegészítőket kínál. Több mint 50 országban van jelen." 
-        },
-        { 
-            id: 11, name: "Adidas", img: "img/l11.png", category: "fashion",
-            desc: "Az Adidas német sportszergyártó, amely cipőket, ruházatot és kiegészítőket gyárt. Innovációik középpontjában a sportteljesítmény növelése és a fenntarthatóság áll." 
-        },
-        { 
-            id: 12, name: "Zalando", img: "img/l12.png", category: "fashion",
-            desc: "A Zalando egy berlini központú, vezető európai online divat- és életmódplatform, amely ruházatot, cipőket, kiegészítőket és szépségápolási termékeket kínál több millió vásárlónak." 
-        },
-        { 
-            id: 13, name: "Telekom", img: "img/l13.png", category: "tech",
-            desc: "A Deutsche Telekom AG európai telekommunikációs vállalat, amely mobil- és vezetékes szolgáltatásokat, valamint digitális megoldásokat kínál. Több országban működik leányvállalatokon keresztül." 
-        },
-        { 
-            id: 14, name: "Samsung", img: "img/l14.png", category: "tech",
-            desc: "A Samsung dél-koreai multinacionális elektronikai vállalat. Kínálatukban mobiltelefonok, televíziók, háztartási gépek és félvezetők találhatók. Erős kutatás-fejlesztési bázissal rendelkeznek." 
-        },
-        { 
-            id: 15, name: "Instagram", img: "img/l15.png", category: "social",
-            desc: "Az Instagram a Meta Platforms tulajdonában lévő közösségi média alkalmazás, amely fotók és videók megosztására épül. Világszerte több százmillió aktív felhasználóval rendelkezik." 
-        },
-        { 
-            id: 16, name: "Tesla", img: "img/l16.png", category: "auto",
-            desc: "A Tesla Inc. amerikai autógyártó és energiatechnológiai vállalat, amely az elektromos járművek és a megújuló energia megoldások úttörője. Küldetésük a fenntartható közlekedés előmozdítása." 
-        },
-        { 
-            id: 17, name: "Ford", img: "img/l17.png", category: "auto",
-            desc: "A Ford Motor Company amerikai autógyártó, amely több mint egy évszázada gyárt járműveket. Innovációik középpontjában az elektromos járművek és az automatizált vezetési technológiák állnak." 
-        },
-        { 
-            id: 18, name: "Ferrari", img: "img/l18.png", category: "auto",
-            desc: "Az olasz Ferrari luxus sportautógyártó, amely a sebesség, a teljesítmény és az exkluzivitás szimbóluma. Versenypályán és közúton egyaránt ikonikus márka." 
-        },
-        { 
-            id: 19, name: "Google", img: "img/l19.png", category: "tech",
-            desc: "A Google a világ legnépszerűbb keresőmotorját üzemelteti, emellett vezető szerepet tölt be az MI, a felhőalapú számítástechnika és az okostelefon-operációs rendszerek terén." 
-        },
-        { 
-            id: 20, name: "Red-Bull", img: "img/l20.png", category: "food",
-            desc: "Az osztrák Red Bull energiaital-gyártó vállalat, amely a 'Red Bull szárnyakat ad' szlogennel vált világhírűvé. Jelentős szereplő a sport- és extrémsport szponzorációban." 
-        },
-        { 
-            id: 21, name: "Szentkirályi", img: "img/l21.png", category: "food",
-            desc: "Magyar ásványvíz márka, amely természetes forrásból származó, prémium minőségű ásványvizet kínál." 
-        },
-        { 
-            id: 22, name: "Zwack", img: "img/l22.png", category: "food",
-            desc: "Magyar italgyártó vállalat, legismertebb terméke az Unicum gyógynövénylikőr." 
-        },
-        { 
-            id: 23, name: "Heineken", img: "img/l23.png", category: "food",
-            desc: "Holland sörgyártó vállalat, világszerte ismert prémium lager söreiről." 
-        },
-        { 
-            id: 24, name: "Jack Daniels", img: "img/l24.png", category: "food",
-            desc: "Amerikai whiskey márka, híres Tennessee whiskey-jéről és ikonikus fekete címkéjéről." 
-        },
-        { 
-            id: 25, name: "OMV", img: "img/l25.png", category: "auto",
-            desc: "Osztrák olaj- és gázipari vállalat, amely üzemanyag-ellátással és energiatermeléssel foglalkozik." 
-        },
-        { 
-            id: 26, name: "MOL", img: "img/l26.png", category: "auto",
-            desc: "Magyar olaj- és gázipari vállalat, amely Közép- és Kelet-Európa egyik vezető energiaipari szereplője." 
-        },
-        { 
-            id: 27, name: "Shell", img: "img/l27.png", category: "auto",
-            desc: "Globális energiavállalat, amely olaj-, gáz- és megújuló energiaforrásokkal foglalkozik." 
-        },
-        { 
-            id: 28, name: "Turkish Airlines", img: "img/l28.png", category: "auto",
-            desc: "Török nemzeti légitársaság, amely több mint 300 célállomásra repül világszerte." 
-        },
-        { 
-            id: 29, name: "Petronas", img: "img/l29.png", category: "auto",
-            desc: "Malajziai állami olaj- és gázipari vállalat, amely a Formula–1 szponzorációjáról is ismert." 
-        },
-        { 
-            id: 30, name: "Michelin", img: "img/l30.png", category: "auto",
-            desc: "Francia gumiabroncs-gyártó, híres a Michelin Guide éttermi értékeléseiről is." 
-        },
-        { 
-            id: 31, name: "Bridgestone", img: "img/l31.png", category: "auto",
-            desc: "Japán gumiabroncs- és autóipari termékgyártó, a világ egyik legnagyobb abroncsgyártója." 
-        },
-        { 
-            id: 32, name: "Nestlé", img: "img/l32.png", category: "food",
-            desc: "Svájci multinacionális élelmiszeripari vállalat, amely kávét, csokoládét, tejtermékeket és bébiételeket gyárt." 
-        },
-        { 
-            id: 33, name: "TikTok", img: "img/l33.png", category: "social",
-            desc: "Kínai közösségi média platform, amely rövid videók megosztására épül." 
-        },
-        { 
-            id: 34, name: "Facebook", img: "img/l34.png", category: "social",
-            desc: "Meta Platforms közösségi hálózata, amely világszerte több milliárd felhasználót kapcsol össze." 
-        },
-        { 
-            id: 35, name: "Hugo Boss", img: "img/l35.png", category: "fashion",
-            desc: "Német divatmárka, amely prémium férfi és női ruházatot, parfümöket és kiegészítőket kínál." 
-        },
-        { 
-            id: 36, name: "Louis Vuitton", img: "img/l36.png", category: "fashion",
-            desc: "Francia luxus divatmárka, híres bőrtáskáiról, ruházatáról és kiegészítőiről." 
-        },
-        { 
-            id: 37, name: "Ralph Lauren", img: "img/l37.png", category: "fashion",
-            desc: "Amerikai divatmárka, amely elegáns ruházatot, parfümöket és lakberendezési cikkeket kínál." 
-        },
-        { 
-            id: 38, name: "Xbox", img: "img/l38.png", category: "tech",
-            desc: "A Microsoft videojáték-konzol márkája, amely világszerte népszerű a gamerek körében." 
-        },
-        { 
-            id: 39, name: "PlayStation", img: "img/l39.png", category: "tech",
-            desc: "A Sony videojáték-konzol márkája, amely a modern gaming egyik vezető platformja." 
-        },
-        { 
-            id: 40, name: "Nvidia", img: "img/l40.png", category: "tech",
-            desc: "Amerikai technológiai vállalat, amely grafikus processzorokat (GPU) és mesterséges intelligencia megoldásokat fejleszt." 
-        },
-        { 
-            id: 41, name: "Intel", img: "img/l41.png", category: "tech",
-            desc: "Amerikai félvezetőgyártó, processzorokat és chipkészleteket gyárt számítógépekhez és adatközpontokhoz." 
-        },
-        { 
-            id: 42, name: "AMD", img: "img/l42.png", category: "tech",
-            desc: "Amerikai félvezetőgyártó, amely CPU-kat és GPU-kat fejleszt, versenytársa az Intelnek és Nvidiának." 
-        },
-        { 
-            id: 43, name: "Razer", img: "img/l43.png", category: "tech",
-            desc: "Amerikai-szingapúri gamer márka, amely perifériákat, laptopokat és kiegészítőket gyárt." 
-        },
-        { 
-            id: 44, name: "Suzuki", img: "img/l44.png", category: "auto",
-            desc: "Japán autó- és motorgyártó vállalat, amely kompakt járműveiről és motorjairól ismert." 
-        },
-        { 
-            id: 45, name: "Burger King", img: "img/l45.png", category: "food",
-            desc: "Amerikai gyorsétteremlánc, híres Whopper szendvicséről." 
-        },
-        { 
-            id: 46, name: "Toyota", img: "img/l46.png", category: "auto",
-            desc: "Japán autógyártó, a hibrid járművek úttörője és a világ egyik legnagyobb autógyártója." 
-        },
-        { 
-            id: 47, name: "VW", img: "img/l47.png", category: "auto",
-            desc: "A Volkswagen német autógyártó, amely ikonikus modelleket, például a Golfot és a Beetle-t gyártja." 
-        },
-        { 
-            id: 48, name: "OTP", img: "img/l48.png", category: "tech",
-            desc: "Magyar bankcsoport, amely Közép- és Kelet-Európában nyújt pénzügyi szolgáltatásokat." 
-        },
-        { 
-            id: 49, name: "Raiffeisen", img: "img/l49.png", category: "tech",
-            desc: "Osztrák bankcsoport, amely nemzetközi pénzügyi szolgáltatásokat kínál." 
-        },
-        { 
-            id: 50, name: "Erste", img: "img/l50.png", category: "tech",
-            desc: "Osztrák bankcsoport, amely Közép-Európában nyújt lakossági és vállalati pénzügyi szolgáltatásokat." 
-        },
-        { 
-            id: 51, name: "YouTube", img: "img/l51.png", category: "social",
-            desc: "A Google tulajdonában lévő videómegosztó platform, amely világszerte a legnépszerűbb online videós szolgáltatás." 
-        },
-        { 
-            id: 52, name: "BMW", img: "img/l52.png", category: "auto",
-            desc: "Német prémium autógyártó, amely a sportos elegancia és a fejlett technológia szinonimája." 
-        },
-        { 
-            id: 53, name: "Rolls-Royce", img: "img/l53.png", category: "auto",
-            desc: "Brit luxusautógyártó, amely ikonikus, kézzel készített járműveiről ismert." 
-        },
-        { 
-            id: 54, name: "Netflix", img: "img/l54.png", category: "social",
-            desc: "Globális streaming szolgáltató, amely filmek, sorozatok és dokumentumfilmek széles választékát kínálja." 
-        },
-        { 
-            id: 55, name: "Walt Disney", img: "img/l55.png", category: "social",
-            desc: "Amerikai szórakoztatóipari óriás, amely filmeket, animációkat, vidámparkokat és médiatartalmakat kínál." 
-        },
-        { 
-            id: 56, name: "SAP", img: "img/l56.png", category: "tech",
-            desc: "Német szoftvervállalat, amely vállalatirányítási rendszereket és üzleti megoldásokat fejleszt." 
-        },
-        { 
-            id: 57, name: "Visa", img: "img/l57.png", category: "tech",
-            desc: "Globális pénzügyi szolgáltató, amely elektronikus fizetési megoldásokat és bankkártyákat kínál." 
-        },
-        { 
-            id: 58, name: "MasterCard", img: "img/l58.png", category: "tech",
-            desc: "Nemzetközi pénzügyi szolgáltató, amely bankkártyás fizetési rendszereket működtet." 
-        },
-        { 
-            id: 59, name: "Cisco", img: "img/l59.png", category: "tech",
-            desc: "Amerikai technológiai vállalat, amely hálózati berendezéseket és digitális infrastruktúrát fejleszt." 
-        },
-        { 
-            id: 60, name: "Caterpillar", img: "img/l60.png", category: "auto",
-            desc: "Amerikai ipari vállalat, amely nehézgépeket, építőipari berendezéseket és motorokat gyárt." 
-        },
-        { 
-            id: 61, name: "Bosch", img: "img/l61.png", category: "tech",
-            desc: "Német multinacionális vállalat, amely autóipari alkatrészeket, háztartási gépeket és ipari technológiákat gyárt." 
-        },
-        { 
-            id: 62, name: "Liebherr", img: "img/l62.png", category: "auto",
-            desc: "Német ipari vállalat, amely építőipari gépeket, darukat és háztartási berendezéseket gyárt." 
-        },
-        { 
-            id: 63, name: "L'Oréal", img: "img/l63.png", category: "fashion",
-            desc: "Francia kozmetikai óriás, amely szépségápolási termékeket és hajápolási megoldásokat kínál." 
-        },
-        { 
-            id: 64, name: "Airbus", img: "img/l64.png", category: "auto",
-            desc: "Európai repülőgépgyártó vállalat, amely kereskedelmi és katonai repülőgépeket fejleszt." 
-        },
-        { 
-            id: 65, name: "HSBC", img: "img/l65.png", category: "tech",
-            desc: "Brit multinacionális bank, amely globális pénzügyi szolgáltatásokat kínál." 
-        },
-        { 
-            id: 66, name: "Rolex", img: "img/l66.png", category: "fashion",
-            desc: "Svájci luxusóra márka, amely ikonikus presztízsóráiról ismert." 
-        },
-        { 
-            id: 67, name: "Hublot", img: "img/l67.png", category: "fashion",
-            desc: "Svájci luxusóra márka, amely innovatív dizájnjáról és sportos stílusáról híres." 
-        },
-        { 
-            id: 68, name: "Omega", img: "img/l68.png", category: "fashion",
-            desc: "Svájci óragyártó, amely a precíziós időmérés és az űrkutatás szimbóluma." 
-        },
-        { 
-            id: 69, name: "Breitling", img: "img/l69.png", category: "fashion",
-            desc: "Svájci óragyártó, amely pilótaóráiról és sportos kronográfjairól ismert." 
-        },
-        { 
-            id: 70, name: "Patek Philippe", img: "img/l70.png", category: "fashion",
-            desc: "Svájci luxusóra márka, amely kézzel készített, exkluzív időmérőket gyárt." 
-        },
-        { 
-            id: 71, name: "Tag Heuer", img: "img/l71.png", category: "fashion",
-            desc: "Svájci óragyártó, amely sportos kronográfjairól és innovatív dizájnjáról híres." 
-        },
-        { 
-            id: 72, name: "Prada", img: "img/l72.png", category: "fashion",
-            desc: "Olasz luxus divatmárka, amely táskákat, ruházatot és kiegészítőket kínál." 
-        },
-        { 
-            id: 73, name: "Armani", img: "img/l73.png", category: "fashion",
-            desc: "Olasz divatmárka, amely elegáns ruházatot, parfümöket és kiegészítőket kínál." 
-        },
-        { 
-            id: 74, name: "Porsche", img: "img/l74.png", category: "auto",
-            desc: "Német autógyártó, amely sportautóiról és prémium járműveiről ismert." 
-        },
-        { 
-            id: 75, name: "Bentley", img: "img/l75.png", category: "auto",
-            desc: "Brit luxusautógyártó, amely exkluzív, kézzel készített járműveket gyárt." 
-        },
-        { 
-            id: 76, name: "Gucci", img: "img/l76.png", category: "fashion",
-            desc: "Olasz luxus divatmárka, amely ikonikus táskáiról, cipőiről és ruházatáról híres." 
-        },
-        { 
-            id: 77, name: "Dior", img: "img/l77.png", category: "fashion",
-            desc: "Francia luxus divatmárka, amely haute couture ruházatot, parfümöket és kiegészítőket kínál." 
-        },
-        { 
-            id: 78, name: "Versace", img: "img/l78.png", category: "fashion",
-            desc: "Olasz divatmárka, amely extravagáns stílusáról és ikonikus mintáiról ismert." 
-        }
-    ];
-
-    const META = {
-        premium: [3, 16, 20, 66, 76],                       
-        newDaysAgo: { 21: 0, 22: 1, 48: 2, 26: 4, 43: 6 }, 
-        baseOpens: { 3: 128, 19: 120, 16: 97, 1: 85, 2: 80, 54: 72, 40: 66, 76: 58, 20: 55, 5: 50, 14: 44, 36: 41 }
     };
 
     const categoryNames = {
@@ -406,10 +85,217 @@ window.onload = () => {
         social: "Közösségi Média"
     };
 
+    // ADATOK
+    const items = [
+        { 
+            id: 1, name: "Nike", img: "img/l1.png", category: "fashion", categories: ["fashion"],
+            desc: "A Nike Inc. egy amerikai multinacionális vállalat, amely cipők, ruházati cikkek, sportfelszerelések és kiegészítők tervezésével, fejlesztésével és gyártásával foglalkozik. Küldetésük az inspiráció és innováció eljuttatása minden sportolóhoz a világon." 
+        },
+        { 
+            id: 2, name: "McDonald's", img: "img/l2.png", category: "food", categories: ["food"],
+            desc: "A világ vezető gyorséttermi lánca, több mint 100 országban van jelen. Folyamatosan fejleszti éttermi élményét és globális ellátási láncát a fenntarthatóság jegyében." 
+        },
+        { 
+            id: 3, name: "Apple", img: "img/l3.png", category: "tech", categories: ["tech"],
+            desc: "Az Apple Inc. technológiai vállalat, amely fogyasztói elektronikát, számítógépes szoftvereket és online szolgáltatásokat fejleszt. Innovációjuk kulcsa a felhasználói élmény tökéletesítése." 
+        },
+        { 
+            id: 4, name: "Mercedes-Benz", img: "img/l4.png", category: "auto", categories: ["auto"],
+            desc: "A Mercedes-Benz német prémium autómárka, amely a luxus, a biztonság és a fejlett technológia szinonimája. Jelenleg nagy hangsúlyt fektetnek az elektromos járművek fejlesztésére." 
+        },
+        { 
+            id: 5, name: "Coca-Cola", img: "img/l5.png", category: "food", categories: ["food"],
+            desc: "A Coca-Cola Company a világ egyik legnagyobb italgyártója, termékeit több mint 200 országban értékesítik. Elkötelezettek a fenntartható csomagolási megoldások iránt." 
+        },
+        { 
+            id: 6, name: "Microsoft", img: "img/l6.png", category: "tech", categories: ["tech"],
+            desc: "A Microsoft globális technológiai vállalat, amely szoftverek, fogyasztói elektronikai eszközök, személyi számítógépek és szolgáltatások fejlesztésével foglalkozik. Fő fókuszban a felhőszolgáltatások (Azure) állnak." 
+        },
+        { 
+            id: 7, name: "Amazon", img: "img/l7.png", category: "tech", categories: ["tech"],
+            desc: "Az Amazon.com a világ egyik legnagyobb e-kereskedelmi vállalata és felhőszolgáltatója (AWS). Céljuk a vevőközpontúság, az innováció és az operatív kiválóság." 
+        },
+        { 
+            id: 8, name: "X", img: "img/l8.png", category: "social", categories: ["social"],
+            desc: "Az X (korábban Twitter) egy globális közösségi média platform, amely rövid üzenetek megosztására épül. Fontos szerepet játszik a valós idejű kommunikációban és hírek terjesztésében." 
+        },
+        { 
+            id: 9, name: "Ikea", img: "img/l9.png", category: "home", categories: ["home"],
+            desc: "Az IKEA svéd multinacionális vállalat, amely megfizethető és praktikus bútorokat, lakberendezési cikkeket és kiegészítőket kínál. Fenntarthatósági törekvéseik középpontjában az újrahasznosítás és a környezetbarát anyagok állnak." 
+        },
+        { 
+            id: 10, name: "Jysk", img: "img/l10.png", category: "home", categories: ["home"],
+            desc: "A JYSK dán kiskereskedelmi lánc, amely bútorokat, matracokat, lakberendezési cikkeket és háztartási kiegészítőket kínál. Több mint 50 országban van jelen." 
+        },
+        { 
+            id: 11, name: "Adidas", img: "img/l11.png", category: "fashion", categories: ["fashion"],
+            desc: "Az Adidas német sportszergyártó, amely cipőket, ruházatot és kiegészítőket gyárt. Innovációik középpontjában a sportteljesítmény növelése és a fenntarthatóság áll." 
+        },
+        { 
+            id: 12, name: "Zalando", img: "img/l12.png", category: "fashion", categories: ["fashion"],
+            desc: "A Zalando egy berlini központú, vezető európai divat- és életmódplatform, amely ruházatot, cipőket, kiegészítőket és szépségápolási termékeket kínál több millió vásárlónak." 
+        },
+        { 
+            id: 13, name: "Telekom", img: "img/l13.png", category: "tech", categories: ["tech"],
+            desc: "A Deutsche Telekom AG európai telekommunikációs vállalat, amely mobil- és vezetékes szolgáltatásokat, valamint digitális megoldásokat kínál. Több országban működik leányvállalatokon keresztül." 
+        },
+        { 
+            id: 14, name: "Samsung", img: "img/l14.png", category: "tech", categories: ["tech"],
+            desc: "A Samsung dél-koreai multinacionális elektronikai vállalat. Kínálatukban mobiltelefonok, televíziók, háztartási gépek és félvezetők találhatók. Erős kutatás-fejlesztési bázissal rendelkeznek." 
+        },
+        { 
+            id: 15, name: "Instagram", img: "img/l15.png", category: "social", categories: ["social"],
+            desc: "Az Instagram a Meta Platforms tulajdonában lévő közösségi média alkalmazás, amely fotók és videók megosztására épül. Világszerte több százmillió aktív felhasználóval rendelkezik." 
+        },
+        { 
+            id: 16, name: "Tesla", img: "img/l16.png", category: "auto", categories: ["auto"],
+            desc: "A Tesla Inc. amerikai autógyártó és energiatechnológiai vállalat, amely az elektromos járművek és a megújuló energia megoldások úttörője. Küldetésük a fenntartható közlekedés előmozdítása." 
+        },
+        { 
+            id: 17, name: "Ford", img: "img/l17.png", category: "auto", categories: ["auto"],
+            desc: "A Ford Motor Company amerikai autógyártó, amely több mint egy évszázada gyárt járműveket. Innovációik középpontjában az elektromos járművek és az automatizált vezetési technológiák állnak." 
+        },
+        { 
+            id: 18, name: "Ferrari", img: "img/l18.png", category: "auto", categories: ["auto"],
+            desc: "Az olasz Ferrari luxus sportautógyártó, amely a sebesség, a teljesítmény és az exkluzivitás szimbóluma. Versenypályán és közúton egyaránt ikonikus márka." 
+        },
+        { 
+            id: 19, name: "Google", img: "img/l19.png", category: "tech", categories: ["tech"],
+            desc: "A Google a világ legnépszerűbb keresőmotorját üzemelteti, emellett vezető szerepet tölt be az MI, a felhőalapú számítástechnika és az okostelefon-operációs rendszerek terén." 
+        },
+        { 
+            id: 20, name: "Red-Bull", img: "img/l20.png", category: "food", categories: ["food"],
+            desc: "Az osztrák Red Bull energiaital-gyártó vállalat, amely a 'Red Bull szárnyakat ad' szlogennel vált világhírűvé. Jelentős szereplő a sport- és extrémsport szponzorációban." 
+        },
+        { 
+            id: 21, name: "Szentkirályi", img: "img/l21.png", category: "food", categories: ["food"], desc: "Magyar ásványvíz márka." },
+        { 
+            id: 22, name: "Zwack", img: "img/l22.png", category: "food", categories: ["food"], desc: "Magyar italgyártó vállalat." },
+        { 
+            id: 23, name: "Heineken", img: "img/l23.png", category: "food", categories: ["food"], desc: "Holland sörgyártó vállalat." },
+        { 
+            id: 24, name: "Jack Daniels", img: "img/l24.png", category: "food", categories: ["food"], desc: "Amerikai whiskey márka." },
+        { 
+            id: 25, name: "OMV", img: "img/l25.png", category: "auto", categories: ["auto"], desc: "Osztrák olaj- és gázipari vállalat." },
+        { 
+            id: 26, name: "MOL", img: "img/l26.png", category: "auto", categories: ["auto"], desc: "Magyar olaj- és gázipari vállalat." },
+        { 
+            id: 27, name: "Shell", img: "img/l27.png", category: "auto", categories: ["auto"], desc: "Globális energiavállalat." },
+        { 
+            id: 28, name: "Turkish Airlines", img: "img/l28.png", category: "auto", categories: ["auto"], desc: "Török nemzeti légitársaság." },
+        { 
+            id: 29, name: "Petronas", img: "img/l29.png", category: "auto", categories: ["auto"], desc: "Malajziai olajvállalat." },
+        { 
+            id: 30, name: "Michelin", img: "img/l30.png", category: "auto", categories: ["auto"], desc: "Francia gumiabroncs-gyártó." },
+        { 
+            id: 31, name: "Bridgestone", img: "img/l31.png", category: "auto", categories: ["auto"], desc: "Japán gumiabroncs-gyártó." },
+        { 
+            id: 32, name: "Nestlé", img: "img/l32.png", category: "food", categories: ["food"], desc: "Svájci élelmiszeripari vállalat." },
+        { 
+            id: 33, name: "TikTok", img: "img/l33.png", category: "social", categories: ["social"], desc: "Kínai közösségi média." },
+        { 
+            id: 34, name: "Facebook", img: "img/l34.png", category: "social", categories: ["social"], desc: "Meta Platforms hálózata." },
+        { 
+            id: 35, name: "Hugo Boss", img: "img/l35.png", category: "fashion", categories: ["fashion"], desc: "Német divatmárka." },
+        { 
+            id: 36, name: "Louis Vuitton", img: "img/l36.png", category: "fashion", categories: ["fashion"], desc: "Francia luxus divatmárka." },
+        { 
+            id: 37, name: "Ralph Lauren", img: "img/l37.png", category: "fashion", categories: ["fashion"], desc: "Amerikai divatmárka." },
+        { 
+            id: 38, name: "Xbox", img: "img/l38.png", category: "tech", categories: ["tech"], desc: "Microsoft konzol." },
+        { 
+            id: 39, name: "PlayStation", img: "img/l39.png", category: "tech", categories: ["tech"], desc: "Sony konzol." },
+        { 
+            id: 40, name: "Nvidia", img: "img/l40.png", category: "tech", categories: ["tech"], desc: "GPU gyártó." },
+        { 
+            id: 41, name: "Intel", img: "img/l41.png", category: "tech", categories: ["tech"], desc: "Félvezetőgyártó." },
+        { 
+            id: 42, name: "AMD", img: "img/l42.png", category: "tech", categories: ["tech"], desc: "CPU/GPU gyártó." },
+        { 
+            id: 43, name: "Razer", img: "img/l43.png", category: "tech", categories: ["tech"], desc: "Gamer perifériák." },
+        { 
+            id: 44, name: "Suzuki", img: "img/l44.png", category: "auto", categories: ["auto"], desc: "Japán autógyártó." },
+        { 
+            id: 45, name: "Burger King", img: "img/l45.png", category: "food", categories: ["food"], desc: "Gyorsétteremlánc." },
+        { 
+            id: 46, name: "Toyota", img: "img/l46.png", category: "auto", categories: ["auto"], desc: "Japán autógyártó." },
+        { 
+            id: 47, name: "VW", img: "img/l47.png", category: "auto", categories: ["auto"], desc: "Német autógyártó." },
+        { 
+            id: 48, name: "OTP", img: "img/l48.png", category: "tech", categories: ["tech"], desc: "Bankcsoport." },
+        { 
+            id: 49, name: "Raiffeisen", img: "img/l49.png", category: "tech", categories: ["tech"], desc: "Bankcsoport." },
+        { 
+            id: 50, name: "Erste", img: "img/l50.png", category: "tech", categories: ["tech"], desc: "Bankcsoport." },
+        { 
+            id: 51, name: "YouTube", img: "img/l51.png", category: "social", categories: ["social"], desc: "Videómegosztó." },
+        { 
+            id: 52, name: "BMW", img: "img/l52.png", category: "auto", categories: ["auto"], desc: "Prémium autógyártó." },
+        { 
+            id: 53, name: "Rolls-Royce", img: "img/l53.png", category: "auto", categories: ["auto"], desc: "Luxusautógyártó." },
+        { 
+            id: 54, name: "Netflix", img: "img/l54.png", category: "social", categories: ["social"], desc: "Streaming szolgáltató." },
+        { 
+            id: 55, name: "Walt Disney", img: "img/l55.png", category: "social", categories: ["social"], desc: "Szórakoztatóipar." },
+        { 
+            id: 56, name: "SAP", img: "img/l56.png", category: "tech", categories: ["tech"], desc: "Szoftvervállalat." },
+        { 
+            id: 57, name: "Visa", img: "img/l57.png", category: "tech", categories: ["tech"], desc: "Pénzügyi szolgáltató." },
+        { 
+            id: 58, name: "MasterCard", img: "img/l58.png", category: "tech", categories: ["tech"], desc: "Pénzügyi szolgáltató." },
+        { 
+            id: 59, name: "Cisco", img: "img/l59.png", category: "tech", categories: ["tech"], desc: "Hálózati berendezések." },
+        { 
+            id: 60, name: "Caterpillar", img: "img/l60.png", category: "auto", categories: ["auto"], desc: "Nehézgépek." },
+        { 
+            id: 61, name: "Bosch", img: "img/l61.png", category: "tech", categories: ["tech"], desc: "Ipari technológiák." },
+        { 
+            id: 62, name: "Liebherr", img: "img/l62.png", category: "auto", categories: ["auto"], desc: "Ipari gépek." },
+        { 
+            id: 63, name: "L'Oréal", img: "img/l63.png", category: "fashion", categories: ["fashion"], desc: "Kozmetikai óriás." },
+        { 
+            id: 64, name: "Airbus", img: "img/l64.png", category: "auto", categories: ["auto"], desc: "Repülőgépgyártó." },
+        { 
+            id: 65, name: "HSBC", img: "img/l65.png", category: "tech", categories: ["tech"], desc: "Multinacionális bank." },
+        { 
+            id: 66, name: "Rolex", img: "img/l66.png", category: "fashion", categories: ["fashion"], desc: "Luxusóra márka." },
+        { 
+            id: 67, name: "Hublot", img: "img/l67.png", category: "fashion", categories: ["fashion"], desc: "Luxusóra márka." },
+        { 
+            id: 68, name: "Omega", img: "img/l68.png", category: "fashion", categories: ["fashion"], desc: "Óragyártó." },
+        { 
+            id: 69, name: "Breitling", img: "img/l69.png", category: "fashion", categories: ["fashion"], desc: "Óragyártó." },
+        { 
+            id: 70, name: "Patek Philippe", img: "img/l70.png", category: "fashion", categories: ["fashion"], desc: "Luxusóra márka." },
+        { 
+            id: 71, name: "Tag Heuer", img: "img/l71.png", category: "fashion", categories: ["fashion"], desc: "Óragyártó." },
+        { 
+            id: 72, name: "Prada", img: "img/l72.png", category: "fashion", categories: ["fashion"], desc: "Luxus divatmárka." },
+        { 
+            id: 73, name: "Armani", img: "img/l73.png", category: "fashion", categories: ["fashion"], desc: "Divatmárka." },
+        { 
+            id: 74, name: "Porsche", img: "img/l74.png", category: "auto", categories: ["auto"], desc: "Sportautógyártó." },
+        { 
+            id: 75, name: "Bentley", img: "img/l75.png", category: "auto", categories: ["auto"], desc: "Luxusautógyártó." },
+        { 
+            id: 76, name: "Gucci", img: "img/l76.png", category: "fashion", categories: ["fashion"], desc: "Luxus divatmárka." },
+        { 
+            id: 77, name: "Dior", img: "img/l77.png", category: "fashion", categories: ["fashion"], desc: "Luxus divatmárka." },
+        { 
+            id: 78, name: "Versace", img: "img/l78.png", category: "fashion", categories: ["fashion"], desc: "Divatmárka." }
+    ];
+
+    const META = {
+        premium: [3, 16, 20, 66, 76],                       
+        newDaysAgo: { 21: 0, 22: 1, 48: 2, 26: 4, 43: 6 }, 
+        baseOpens: { 3: 128, 19: 120, 16: 97, 1: 85, 2: 80, 54: 72, 40: 66, 76: 58, 20: 55, 5: 50, 14: 44, 36: 41 }
+    };
+
     items.forEach(it => {
         it.premium = META.premium.includes(it.id);
         if (it.id in META.newDaysAgo) it.addedAt = Date.now() - META.newDaysAgo[it.id] * DAY;
         it.baseOpens = META.baseOpens[it.id] || 0;
+        if (!it.categories) it.categories = [it.category];
     });
 
     // TÁROLÁS
@@ -419,10 +305,10 @@ window.onload = () => {
     };
     const companies = LS.get('bu_companies', []);
     const opens = LS.get('bu_opens', {});
-    const ratings = LS.get('bu_ratings', {}); // itemId -> { totalScore, count, userRatings: { email: score } }
+    const ratings = LS.get('bu_ratings', {}); 
 
     companies.forEach(c => items.push({
-        id: c.id, name: c.name, img: c.logo, category: c.category, desc: c.desc,
+        id: c.id, name: c.name, img: c.logo, category: c.category || (c.categories && c.categories[0]), categories: c.categories || [c.category], desc: c.desc,
         website: c.website, addedAt: c.addedAt, baseOpens: 0, premium: false, registered: true
     }));
 
@@ -439,18 +325,39 @@ window.onload = () => {
         } catch (e) { return ''; }
     };
     const placeholder = (n) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
-        `<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70"><rect width="70" height="70" rx="14" fill="#383838"/><text x="35" y="46" font-size="32" text-anchor="middle" fill="#4fc3f7" font-family="sans-serif">${(String(n || '?').trim().charAt(0).toUpperCase()).replace(/[<>&"']/g, '?')}</text></svg>`);
-    const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+    '<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70"><rect width="70" height="70" rx="14" fill="#383838"/><text x="35" y="46" font-size="32" text-anchor="middle" fill="#4fc3f7" font-family="sans-serif">' + (String(n || '?').trim().charAt(0).toUpperCase()).replace(/[<>&"']/g, '?') + '</text></svg>'
+);
 
-    let toastTimer;
-    function showToast(msg) {
-        toastEl.textContent = msg;
-        toastEl.classList.add('active');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toastEl.classList.remove('active'), 5000);
-    }
+const el = (tag, cls, text) => { 
+    const e = document.createElement(tag); 
+    if (cls) e.className = cls; 
+    if (text != null) e.textContent = text; 
+    return e; 
+};
 
-    // Élmény / Részecske hatás értékeléskor (3. pont)
+let toastTimer;
+function showToast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('active');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('active'), 5000);
+}
+
+    // Mobil keresés legördülő panel nyitás-zárás
+    searchToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        searchWrapper.classList.toggle('dropdown-open');
+        if (searchWrapper.classList.contains('dropdown-open')) {
+            searchInput.focus();
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!searchWrapper.contains(e.target)) {
+            searchWrapper.classList.remove('dropdown-open');
+        }
+    });
+
     function ratingParticleEffect(targetElement) {
         const rect = targetElement.getBoundingClientRect();
         const startX = rect.left + rect.width / 2;
@@ -459,7 +366,7 @@ window.onload = () => {
         
         for (let i = 0; i < 7; i++) {
             const p = el('div', 'rating-particle');
-            const angle = (Math.random() * Math.PI) - (Math.PI / 2); // felfelé irány
+            const angle = (Math.random() * Math.PI) - (Math.PI / 2);
             const distance = 40 + Math.random() * 60;
             const dx = Math.cos(angle) * distance;
             const dy = -Math.sin(angle) * distance - 20;
@@ -482,7 +389,6 @@ window.onload = () => {
         }
     }
 
-    // MOBIL ÁLLAPOT, MÉRETEK
     const cardElements = [];
 
     function checkMobileState() {
@@ -495,6 +401,7 @@ window.onload = () => {
         } else {
             maxSpeed = DESKTOP_MAX_SPEED;
             mobileWarningModal.classList.remove('active');
+            searchWrapper.classList.remove('dropdown-open');
         }
     }
 
@@ -526,25 +433,22 @@ window.onload = () => {
         });
     }
 
+    // 2. pont: Biztosítja, hogy szűrt tartalomnál a logók soha ne fedjék egymást, hanem fix cellákban legyenek rendezve
     function calculateCenteredGrid(cards) {
-        const W = window.innerWidth, H = window.innerHeight, gap = 12;
+        const W = window.innerWidth, gap = 14;
         const maxSize = Math.max(...cards.map(c => c.size));
         const cell = maxSize + gap;
-        const gridW = Math.min(W - 30, 900);
+        const gridW = Math.min(W - 40, 1000);
         const cols = Math.max(1, Math.min(Math.floor(gridW / cell), cards.length));
-        const rows = Math.ceil(cards.length / cols);
-        const top = navHeight + 40, availH = H - top - 16;
-        const stepY = rows > 1 ? Math.max(40, Math.min(cell, (availH - maxSize) / (rows - 1))) : cell;
-        const usedW = cols * cell, usedH = (rows - 1) * stepY + maxSize;
-        const startX = (W - usedW) / 2, startY = top + Math.max(0, (availH - usedH) / 2);
+        const top = navHeight + 50;
+        const startX = (W - (cols * cell)) / 2;
         cards.forEach((c, i) => {
             const col = i % cols, row = Math.floor(i / cols);
             c.targetX = startX + col * cell + (cell - c.size) / 2;
-            c.targetY = startY + row * stepY + (maxSize - c.size) / 2;
+            c.targetY = top + row * cell + (cell - c.size) / 2;
         });
     }
 
-    // KÁRTYÁK LÉTREHOZÁSA
     function createCard(item, spawn) {
         const card = el('div', 'card' + (item.premium ? ' premium' : ''));
         const img = new Image();
@@ -563,7 +467,7 @@ window.onload = () => {
             vx: ((Math.random() - 0.5) * maxSpeed * 2),
             vy: ((Math.random() - 0.5) * maxSpeed * 2),
             name: norm(item.name),
-            hay: norm(item.name + ' ' + (item.desc || '') + ' ' + (categoryNames[item.category] || '')),
+            hay: norm(item.name + ' ' + (item.desc || '')),
             originalData: item,
             isDragging: false, canClick: true, isHovering: false,
             targetX: undefined, targetY: undefined,
@@ -669,7 +573,6 @@ window.onload = () => {
     }
     animate();
 
-    // KERESÉS ÉS SZŰRÉS (1. pont: szűrés törlése után újraindulnak)
     function filterItems() {
         const { tokens, activeCategory: cat, special } = filterState;
         const isAnyFilterActive = tokens.length > 0 || cat !== null || special !== null;
@@ -681,21 +584,24 @@ window.onload = () => {
 
         cardElements.forEach(item => {
             const o = item.originalData;
-            const ok = tokens.every(t => item.hay.includes(t))
-                && (cat === null || o.category === cat)
-                && (special !== 'new' || isNew(o))
-                && (special !== 'premium' || o.premium)
-                && (special !== 'popular' || topIds.has(o.id));
+            const matchesToken = tokens.every(t => item.hay.includes(t));
+            const matchesCat = (cat === null || (o.categories && o.categories.includes(cat)) || o.category === cat);
+            const matchesSpecial = (
+                special === null || 
+                (special === 'new' && isNew(o)) || 
+                (special === 'premium' && o.premium) || 
+                (special === 'popular' && topIds.has(o.id))
+            );
+
+            let ok = matchesToken && matchesCat && matchesSpecial;
+
             item.element.classList.remove('premium-bg');
             if (ok) {
                 item.element.classList.remove('filtered-out');
                 matching.push(item);
             } else {
                 item.targetX = undefined; item.targetY = undefined;
-                if (o.premium && isAnyFilterActive) {
-                    item.element.classList.remove('filtered-out');
-                    item.element.classList.add('premium-bg');
-                } else item.element.classList.add('filtered-out');
+                item.element.classList.add('filtered-out');
             }
         });
 
@@ -703,11 +609,9 @@ window.onload = () => {
             matching.sort((a, b) => (b.originalData.premium ? 1 : 0) - (a.originalData.premium ? 1 : 0));
             calculateCenteredGrid(matching);
         } else if (!isAnyFilterActive) {
-            // Ha nincsen aktív szűrés, a célpozíciók törlődnek, így a kártyák újra útnak indulnak
             cardElements.forEach(i => { 
                 i.targetX = undefined; 
                 i.targetY = undefined;
-                // Adjunk nekik új sebességet is, hogy biztosan elinduljanak
                 i.vx = ((Math.random() - 0.5) * maxSpeed * 2);
                 i.vy = ((Math.random() - 0.5) * maxSpeed * 2);
             });
@@ -755,7 +659,6 @@ window.onload = () => {
     }
     resetFilterBtn.addEventListener('click', () => resetAll(true));
 
-    // FELFEDEZŐ SÁV & GYORSZSŰRŐK (2. és 6. pont)
     let activeTab = 'popular';
     function renderDiscover() {
         let list = [];
@@ -778,31 +681,16 @@ window.onload = () => {
         });
     }
 
-    // Gyorsgomb szűrés logika (2. pont)
-    function applyQuickFilter(tabName) {
-        activeTab = tabName;
-        dTabs.forEach(x => x.classList.toggle('active', x.dataset.tab === tabName));
-        renderDiscover();
-        
-        // Gyorsszűrő élesítése a kártyákra is:
-        if (tabName === 'popular') filterState.special = 'popular';
-        else if (tabName === 'new') filterState.special = 'new';
-        else if (tabName === 'premium') filterState.special = 'premium';
-        filterItems();
-
-        // Ha mobilon vagyunk, zárjuk be a menüt a kiválasztás után
-        if (isMobileView) {
-            navLinks.classList.remove('active');
-            hamburgerBtn.classList.remove('active');
-            container.style.pointerEvents = 'all';
-        }
-    }
-
     dTabs.forEach(t => t.addEventListener('click', () => {
-        applyQuickFilter(t.dataset.tab);
+        activeTab = t.dataset.tab;
+        dTabs.forEach(x => x.classList.toggle('active', x.dataset.tab === activeTab));
+        renderDiscover();
+        if (activeTab === 'popular') filterState.special = 'popular';
+        else if (activeTab === 'new') filterState.special = 'new';
+        else if (activeTab === 'premium') filterState.special = 'premium';
+        filterItems();
     }));
 
-    // Kártyák újrakeverése (6. pont)
     function shuffleCards() {
         cardElements.forEach(item => {
             if (!item.element.classList.contains('filtered-out')) {
@@ -813,18 +701,11 @@ window.onload = () => {
             }
         });
         showToast('🔀 Kártyák újrakeverve!');
-        if (isMobileView) {
-            navLinks.classList.remove('active');
-            hamburgerBtn.classList.remove('active');
-            container.style.pointerEvents = 'all';
-        }
     }
     randomBtn.addEventListener('click', shuffleCards);
-    mobileRandomBtn.addEventListener('click', shuffleCards);
 
     renderDiscover();
 
-    // RÉSZLETES MODAL & ÉRTÉKELÉSI RENDSZER (3. pont)
     function openModal(item) {
         opens[item.id] = (opens[item.id] || 0) + 1;
         LS.set('bu_opens', opens);
@@ -834,7 +715,9 @@ window.onload = () => {
         mi.src = item.img;
         $('modal-title').innerText = item.name;
         $('modal-desc').innerText = item.desc;
-        modalCategory.innerText = categoryNames[item.category] || item.category;
+        
+        const cats = item.categories || [item.category];
+        modalCategory.innerText = cats.map(c => categoryNames[c] || c).join(', ');
         modalDetailsText.innerText = item.details || "Részletes leírás hamarosan...";
 
         modalBadges.replaceChildren();
@@ -844,7 +727,6 @@ window.onload = () => {
         if (rank > -1) modalBadges.appendChild(el('span', 'mbadge fire', '🔥 Top ' + (rank + 1)));
         modalStats.textContent = '👁 ' + totalOpens(item) + ' megnyitás';
 
-        // Értékelési widget frissítése
         updateRatingUI(item);
 
         const url = safeUrl(item.website);
@@ -873,13 +755,11 @@ window.onload = () => {
             if (val <= userScore) star.classList.add('active');
             else star.classList.remove('active');
 
-            // Eseménykezelő az értékeléshez
             star.onclick = () => {
                 if (!session) {
                     showToast('⚠️ Az értékeléshez előbb be kell jelentkezned!');
                     return;
                 }
-                // Értékelés mentése
                 const oldScore = itemRating.userRatings[session] || 0;
                 if (oldScore === 0) {
                     itemRating.count++;
@@ -922,27 +802,88 @@ window.onload = () => {
         container.style.pointerEvents = navLinks.classList.contains('active') ? 'none' : 'all';
     });
 
-    // REGISZTRÁCIÓ / BELÉPÉS (4. pont: Cég vagy Vendég választás)
+    // REGISZTRÁCIÓ / BELÉPÉS
     const authModal = $('authModal'), authBtn = $('authBtn'), authLabel =$('authLabel');
     const authTabs = $('authTabs'), authTitle =$('authTitle');
     const registerForm = $('registerForm'), loginForm = $('loginForm'), accountView =$('accountView');
-    const regLogo = $('regLogo'), regDesc =$('regDesc'), regName = $('regName'), regCat =$('regCat');
+    const regLogo = $('regLogo'), regDesc = $('regDesc'), regName =$('regName');
     const descCount = $('descCount'), previewWrap = $('previewWrap'), previewCard =$('previewCard');
     const companyFieldsOnly = $('companyFieldsOnly');
     const regTypeRadios = document.querySelectorAll('input[name="regType"]');
+    const regCatContainer = $('regCatContainer');
     let pendingLogo = null;
+    let selectedCategories = [];
 
+    // Kategória chipek generálása a regisztrációhoz (6. pont: max 3 kategória)
     Object.entries(categoryNames).forEach(([k, v]) => {
-        const o = el('option', null, v); o.value = k; regCat.appendChild(o);
+        const btn = el('button', 'reg-cat-chip', v);
+        btn.type = 'button';
+        btn.dataset.category = k;
+        btn.onclick = () => {
+            if (selectedCategories.includes(k)) {
+                selectedCategories = selectedCategories.filter(x => x !== k);
+                btn.classList.remove('active');
+            } else {
+                if (selectedCategories.length >= 3) {
+                    showToast('⚠️ Maximum 3 kategóriát választhatsz ki!');
+                    return;
+                }
+                selectedCategories.push(k);
+                btn.classList.add('active');
+            }
+            setErr(registerForm, 'regCat', selectedCategories.length === 0 ? 'Válassz ki legalább 1 kategóriát.' : '');
+        };
+        regCatContainer.appendChild(btn);
     });
 
-    // Regisztrációs típus váltás kezelése (4. pont)
     regTypeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             const isCompany = e.target.value === 'company';
             companyFieldsOnly.style.display = isCompany ? 'block' : 'none';
         });
     });
+
+    // Drag and Drop logó feltöltés kezelése (5. pont)
+    const fileDropzone = $('fileDropzone');
+    const dropzoneContent = $('dropzoneContent');
+
+    fileDropzone.addEventListener('click', () => regLogo.click());
+    fileDropzone.addEventListener('dragover', (e) => { e.preventDefault(); fileDropzone.classList.add('dragover'); });
+    fileDropzone.addEventListener('dragleave', () => fileDropzone.classList.remove('dragover'));
+    fileDropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileDropzone.classList.remove('dragover');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            regLogo.files = e.dataTransfer.files;
+            handleLogoFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    regLogo.addEventListener('change', () => {
+        if (regLogo.files && regLogo.files[0]) {
+            handleLogoFile(regLogo.files[0]);
+        }
+    });
+
+    function handleLogoFile(f) {
+        pendingLogo = null;
+        if (!f.type.startsWith('image/')) { setErr(registerForm, 'regLogo', 'Csak képfájl tölthető fel.'); renderPreview(); return; }
+        if (f.size > 5 * 1024 * 1024) { setErr(registerForm, 'regLogo', 'Maximum 5 MB méretű kép tölthető fel.'); renderPreview(); return; }
+        const url = URL.createObjectURL(f), img = new Image();
+        img.onload = () => {
+            const S = 256, cv = document.createElement('canvas');
+            cv.width = cv.height = S;
+            const r = Math.min(S / img.width, S / img.height), w = img.width * r, h = img.height * r;
+            cv.getContext('2d').drawImage(img, (S - w) / 2, (S - h) / 2, w, h);
+            pendingLogo = cv.toDataURL('image/png');
+            URL.revokeObjectURL(url);
+            setErr(registerForm, 'regLogo', '');
+            dropzoneContent.innerHTML = `<span class="dropzone-icon">✅</span><span class="dropzone-text">${f.name} kiválasztva</span>`;
+            renderPreview();
+        };
+        img.onerror = () => { setErr(registerForm, 'regLogo', 'A kép nem olvasható be.'); URL.revokeObjectURL(url); };
+        img.src = url;
+    }
 
     const hash = async (s) => {
         try {
@@ -955,7 +896,7 @@ window.onload = () => {
 
     function updateAuthUI() {
         const c = currentCompany();
-        authLabel.textContent = c ? c.name : 'Belépés';
+        authLabel.textContent = c ? c.name : '';
         authBtn.classList.toggle('logged', !!c);
     }
 
@@ -1001,27 +942,6 @@ window.onload = () => {
     regName.addEventListener('input', renderPreview);
     regDesc.addEventListener('input', () => { descCount.textContent = regDesc.value.length + ' / 300'; });
 
-    regLogo.addEventListener('change', () => {
-        const f = regLogo.files[0];
-        pendingLogo = null;
-        if (!f) { setErr(registerForm, 'regLogo', ''); renderPreview(); return; }
-        if (!f.type.startsWith('image/')) { setErr(registerForm, 'regLogo', 'Csak képfájl tölthető fel.'); renderPreview(); return; }
-        if (f.size > 5 * 1024 * 1024) { setErr(registerForm, 'regLogo', 'Maximum 5 MB méretű kép tölthető fel.'); renderPreview(); return; }
-        const url = URL.createObjectURL(f), img = new Image();
-        img.onload = () => {
-            const S = 256, cv = document.createElement('canvas');
-            cv.width = cv.height = S;
-            const r = Math.min(S / img.width, S / img.height), w = img.width * r, h = img.height * r;
-            cv.getContext('2d').drawImage(img, (S - w) / 2, (S - h) / 2, w, h);
-            pendingLogo = cv.toDataURL('image/png');
-            URL.revokeObjectURL(url);
-            setErr(registerForm, 'regLogo', '');
-            renderPreview();
-        };
-        img.onerror = () => { setErr(registerForm, 'regLogo', 'A kép nem olvasható be.'); URL.revokeObjectURL(url); };
-        img.src = url;
-    });
-
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const f = registerForm;
@@ -1038,29 +958,28 @@ window.onload = () => {
         let item = null;
 
         if (regType === 'company') {
-            const desc = regDesc.value.trim(), cat = regCat.value;
+            const desc = regDesc.value.trim();
             const siteRaw = $('regSite').value.trim(), site = safeUrl(siteRaw);
 
             ok = setErr(f, 'regName', name.length < 2 ? 'A cégnév kötelező (min. 2 karakter).' :
                 (items.some(i => norm(i.name) === norm(name)) ? 'Ez a cégnév már szerepel.' : '')) && ok;
             ok = setErr(f, 'regLogo', pendingLogo ? '' : 'A logó feltöltése kötelező.') && ok;
             ok = setErr(f, 'regDesc', desc.length === 0 ? 'A rövid leírás kötelező.' : (desc.length > 300 ? 'Maximum 300 karakter.' : '')) && ok;
-            ok = setErr(f, 'regCat', cat ? '' : 'Válassz kategóriát.') && ok;
+            ok = setErr(f, 'regCat', selectedCategories.length > 0 ? '' : 'Válassz ki legalább 1 kategóriát.') && ok;
             ok = setErr(f, 'regSite', siteRaw && !site ? 'Érvénytelen weboldal link.' : '') && ok;
             if (!ok) return;
 
-            company = { id: Date.now(), name, email, pass: await hash(pass), logo: pendingLogo, desc, category: cat, website: site, addedAt: Date.now(), type: 'company' };
+            company = { id: Date.now(), name, email, pass: await hash(pass), logo: pendingLogo, desc, categories: [...selectedCategories], category: selectedCategories[0], website: site, addedAt: Date.now(), type: 'company' };
             companies.push(company);
             if (!LS.set('bu_companies', companies)) {
                 companies.pop();
-                setErr(f, 'regLogo', 'Nem sikerült menteni (a böngésző tárhelye megtelt). Próbálj kisebb képet.');
+                setErr(f, 'regLogo', 'Nem sikerült menteni (a tárhely megtelt).');
                 return;
             }
-            item = { id: company.id, name, img: company.logo, category: cat, desc, website: site, addedAt: company.addedAt, baseOpens: 0, premium: false, registered: true };
+            item = { id: company.id, name, img: company.logo, category: company.category, categories: company.categories, desc, website: site, addedAt: company.addedAt, baseOpens: 0, premium: false, registered: true };
             items.push(item);
             createCard(item, true);
         } else {
-            // Vendég regisztráció
             if (!ok) return;
             company = { id: Date.now(), name, email, pass: await hash(pass), type: 'guest', addedAt: Date.now() };
             companies.push(company);
@@ -1068,7 +987,10 @@ window.onload = () => {
         }
 
         LS.set('bu_session', company.email);
-        registerForm.reset(); pendingLogo = null; renderPreview(); descCount.textContent = '0 / 300';
+        registerForm.reset(); pendingLogo = null; selectedCategories = [];
+        document.querySelectorAll('.reg-cat-chip').forEach(c => c.classList.remove('active'));
+        dropzoneContent.innerHTML = `<span class="dropzone-icon">📁</span><span class="dropzone-text">Kattints ide vagy húzd ide a képet (Max 5MB)</span>`;
+        renderPreview(); descCount.textContent = '0 / 300';
         closeAuth(); resetAll(false);
         updateAuthUI(); renderDiscover();
         confetti();
@@ -1099,12 +1021,12 @@ window.onload = () => {
         if (isComp) {
             const im = new Image(); im.src = c.logo; im.alt = '';
             head.append(im);
-            box.append(el('h4', null, c.name), el('p', null, categoryNames[c.category] || c.category || 'Cég'), el('p', null, c.email));
+            const cats = c.categories || [c.category];
+            box.append(el('h4', null, c.name), el('p', null, cats.map(cat => categoryNames[cat] || cat).join(', ') || 'Cég'), el('p', null, c.email));
         } else {
             box.append(el('h4', null, c.name), el('p', null, 'Vendég fiók (Értékelő)'), el('p', null, c.email));
         }
         head.append(box);
-
         accountView.append(head);
 
         if (isComp) {
@@ -1112,13 +1034,13 @@ window.onload = () => {
             const left = Math.max(0, Math.ceil((NEW_DAYS * DAY - (Date.now() - c.addedAt)) / DAY));
             accountView.append(
                 el('p', 'acc-stat', (left > 0 ? `🆕 Az ÚJ jelvényed még ${left} napig látszik.` : 'Az ÚJ jelvényed lejárt.') + '  👁 ' + (it ? totalOpens(it) : 0) + ' megnyitás'),
-                el('div', 'acc-premium', '👑 Prémium csomag – hamarosan! Mindig látható, nagyobb kártya és kiemelt megjelenés.')
+                el('div', 'acc-premium', '👑 Prémium csomag – hamarosan!')
             );
             const open = el('button', 'btn-primary', 'Kártyám megnyitása'); open.type = 'button';
             open.onclick = () => { closeAuth(); if (it) openModal(it); };
             accountView.append(open);
         } else {
-            accountView.append(el('p', 'acc-stat', 'Vendégként szabadon értékelheted a bejelentkezést követően a logókat az 1-5 skálás dollár csillagokkal.'));
+            accountView.append(el('p', 'acc-stat', 'Vendégként szabadon értékelheted a logókat az 1-5 skálás dollár csillagokkal.'));
         }
 
         const out = el('button', 'btn-ghost', 'Kilépés'); out.type = 'button';
